@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="https://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <externalId>false</externalId>
+    <label>Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>requires_payment_method</fullName>
+                <default>false</default>
+                <label>Requires Payment Method</label>
+            </value>
+            <value>
+                <fullName>requires_confirmation</fullName>
+                <default>false</default>
+                <label>Requires Confirmation</label>
+            </value>
+            <value>
+                <fullName>requires_action</fullName>
+                <default>false</default>
+                <label>Requires Action</label>
+            </value>
+            <value>
+                <fullName>processing</fullName>
+                <default>false</default>
+                <label>Processing</label>
+            </value>
+            <value>
+                <fullName>requires_capture</fullName>
+                <default>false</default>
+                <label>Requires Capture</label>
+            </value>
+            <value>
+                <fullName>canceled</fullName>
+                <default>false</default>
+                <label>Canceled</label>
+            </value>
+            <value>
+                <fullName>succeeded</fullName>
+                <default>false</default>
+                <label>Succeeded</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

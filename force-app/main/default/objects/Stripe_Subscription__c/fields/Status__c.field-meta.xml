@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="https://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <externalId>false</externalId>
+    <label>Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>active</fullName>
+                <default>false</default>
+                <label>Active</label>
+            </value>
+            <value>
+                <fullName>canceled</fullName>
+                <default>false</default>
+                <label>Canceled</label>
+            </value>
+            <value>
+                <fullName>incomplete</fullName>
+                <default>false</default>
+                <label>Incomplete</label>
+            </value>
+            <value>
+                <fullName>incomplete_expired</fullName>
+                <default>false</default>
+                <label>Incomplete Expired</label>
+            </value>
+            <value>
+                <fullName>past_due</fullName>
+                <default>false</default>
+                <label>Past Due</label>
+            </value>
+            <value>
+                <fullName>trialing</fullName>
+                <default>false</default>
+                <label>Trialing</label>
+            </value>
+            <value>
+                <fullName>unpaid</fullName>
+                <default>false</default>
+                <label>Unpaid</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

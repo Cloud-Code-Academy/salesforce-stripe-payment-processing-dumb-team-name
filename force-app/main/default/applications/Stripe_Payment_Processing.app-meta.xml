@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomApplication xmlns="https://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0070D2</headerColor>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <description>Manage Stripe customers, subscriptions, and payment transactions</description>
+    <formFactors>Small</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <label>Stripe Payment Processing</label>
+    <navType>Standard</navType>
+    <tabs>standard-Contact</tabs>
+    <tabs>Stripe_Customer__c</tabs>
+    <tabs>Stripe_Subscription__c</tabs>
+    <tabs>Payment_Transaction__c</tabs>
+    <tabs>standard-report</tabs>
+    <tabs>standard-Dashboard</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>Stripe_Payment_Processing_UtilityBar</utilityBar>
+</CustomApplication>
