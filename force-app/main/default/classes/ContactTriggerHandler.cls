@@ -8,10 +8,6 @@ public with sharing class ContactTriggerHandler extends TriggerHandler {
     }
     
     public override void afterInsert(){
-        if(newContactMap.isEmpty()){
-            //Throw an exception and log it
-        }else{
-            ContactService.handleNewContacts((List<Contact>) newContactMap.values());
-        }
+            ContactService.handleNewContacts(newContactMap);
     }
 }

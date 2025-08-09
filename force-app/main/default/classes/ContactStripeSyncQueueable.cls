@@ -1,9 +1,9 @@
 public with sharing class ContactStripeSyncQueueable implements Queueable, Database.AllowsCallouts{
 
-    private List<Contact> contactsToSync;
+    private Map<Id, Contact> contactsToSyncMap;
 
-    public ContactStripeSyncQueueable(List<Contact> contacts){
-        this.contactsToSync = contacts;
+    public ContactStripeSyncQueueable(Map<Id, Contact> contactsToSyncMap){
+        this.contactsToSyncMap = contactsToSyncMap;
     }
 
     public void execute(QueueableContext qc){
