@@ -1,4 +1,4 @@
-public with sharing class StripeAPIResponseWrappers {
+public with sharing class StripeAPIResponseWrappers {    
     
 //     {
 //   "id": "cus_SpLNkcKMswwoBy",
@@ -30,7 +30,7 @@ public with sharing class StripeAPIResponseWrappers {
 //   "test_clock": null
 // }
     public String id {get;set;}
-    public String object {get;set;}
+    public String objectType {get;set;} //object is a reserved word
     public Address address {get;set;}
     public Integer balance {get;set;}
     public String stripeCurrency {get;set;}  // currency is a reserved word}
@@ -65,16 +65,33 @@ public with sharing class StripeAPIResponseWrappers {
         public String default_payment_method { get; set; }
         public String footer { get; set; }
         public Object rendering_options { get; set; }
-
-        public class CustomField{
+    }
+    public class CustomField{
             public String name;
             public String value;
-        }
     }
-
+    
     public class Shipping{
         public Address address { get; set; }
         public String name { get; set; }
         public String phone { get; set; }
     }
+
+    public static StripeAPIResponseWrappers parse(String jsonString) {
+        StripeAPIResponseWrappers res = (StripeAPIResponseWrappers) JSON.deserialize(jsonString, StripeAPIResponseWrappers.class);
+        JSONParser parser = JSON.createParser(jsonString);
+        while (parser.nextToken() != null) {
+            if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                String fieldName = parser.getText();
+                parser.nextToken();
+                if (fieldName == 'object') {
+                    res.objectType = parser.getText();
+                } else if (fieldName == 'currency') {
+                    res.stripeCurrency = parser.getText();
+            }
+        }
+    }
+    return res;
+
+}
 }
