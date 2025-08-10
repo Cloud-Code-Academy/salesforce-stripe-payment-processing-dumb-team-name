@@ -44,7 +44,7 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
                     Stripe_Customer_ID__c = stripeResponse.id);
                     insert newStripeCust;
             } else {
-                                Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
+                    Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
                     .setHttpResponseDetails(res)
                     .setExceptionDetails(new CalloutException('Status: ' + res.getStatus() + ' Body: ' + res.getBody()));
             }
