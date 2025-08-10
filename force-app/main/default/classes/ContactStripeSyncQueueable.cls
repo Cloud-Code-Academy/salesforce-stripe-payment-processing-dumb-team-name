@@ -1,17 +1,16 @@
 public with sharing class ContactStripeSyncQueueable implements Queueable, Database.AllowsCallouts{
 
-    private Map<Id, Contact> contactsToSyncMap;
+    private Set<Id> contactIdsToSync;
+    private List<Contact> contactsToSync;
 
-    public ContactStripeSyncQueueable(Map<Id, Contact> contactsToSyncMap){
-        this.contactsToSyncMap = contactsToSyncMap;
+    public ContactStripeSyncQueueable(Set<Id> contactIdsToSync){
+        this.contactIdsToSync = contactIdsToSync;
+        this.contactsToSync = [SELECT Id, FirstName, LastName, Email, Stripe_Customer_ID__c FROM Contact WHERE Id IN : contactIdsToSync];
     }
 
     public void execute(QueueableContext qc){
-        List<Contact> contactsToUpdate = new List<Contact>();
-        Set<Id> contactIds = contactsToSyncMap.keySet();
-        List<Contact> retrievedContacts = [SELECT Id, FirstName, LastName, Email, Stripe_Customer_ID__c FROM Contact WHERE Id IN : contactIds];
-        
-           for(Contact contactToSync : retrievedContacts) {
+
+           for(Contact contactToSync : this.contactsToSync) {
             StripeAPIRequestWrapper req = new StripeAPIRequestWrapper(
             contactToSync.FirstName + ' ' + contactToSync.LastName,
             contactToSync.Email
