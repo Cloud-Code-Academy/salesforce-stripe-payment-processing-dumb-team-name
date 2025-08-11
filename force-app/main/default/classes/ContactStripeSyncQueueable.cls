@@ -1,16 +1,17 @@
 public with sharing class ContactStripeSyncQueueable implements Queueable, Database.AllowsCallouts{
 
-    private Set<Id> contactIdsToSync;
-    private List<Contact> contactsToSync;
+    private Map<Id, Contact> contactsToSyncMap;
 
-    public ContactStripeSyncQueueable(Set<Id> contactIdsToSync){
-        this.contactIdsToSync = contactIdsToSync;
-        this.contactsToSync = [SELECT Id, FirstName, LastName, Email, Stripe_Customer_ID__c FROM Contact WHERE Id IN : contactIdsToSync];
+    public ContactStripeSyncQueueable(Map<Id, Contact> contactsToSyncMap){
+        this.contactsToSyncMap = contactsToSyncMap;
     }
 
     public void execute(QueueableContext qc){
-
-           for(Contact contactToSync : this.contactsToSync) {
+        List<Contact> contactsToUpdate = new List<Contact>();
+        Set<Id> contactIds = contactsToSyncMap.keySet();
+        List<Contact> retrievedContacts = [SELECT Id, FirstName, LastName, Email, Stripe_Customer_ID__c FROM Contact WHERE Id IN : contactIds];
+        
+           for(Contact contactToSync : retrievedContacts) {
             StripeAPIRequestWrapper req = new StripeAPIRequestWrapper(
             contactToSync.FirstName + ' ' + contactToSync.LastName,
             contactToSync.Email
@@ -44,7 +45,7 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
                     Stripe_Customer_ID__c = stripeResponse.id);
                     insert newStripeCust;
             } else {
-                    Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
+                                Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
                     .setHttpResponseDetails(res)
                     .setExceptionDetails(new CalloutException('Status: ' + res.getStatus() + ' Body: ' + res.getBody()));
             }
