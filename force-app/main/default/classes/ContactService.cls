@@ -4,6 +4,6 @@ public with sharing class ContactService {
           if (newContactMap == null || newContactMap.isEmpty()) {
                return;
           }
-          System.enqueueJob(new ContactStripeSyncQueueable(newContactMap.keySet()));
+          System.enqueueJob(new ContactStripeSyncQueueable(newContactMap));
      }
 }
