@@ -8,6 +8,7 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
 
     public void execute(QueueableContext qc){
         List<Contact> contactsToUpdate = new List<Contact>();
+        List<Stripe_Customer__c> stripeCustomersToInsert = new List<Stripe_Customer__c>();
         Set<Id> contactIds = contactsToSyncMap.keySet();
         List<Contact> retrievedContacts = [SELECT Id, FirstName, LastName, Email, Stripe_Customer_ID__c FROM Contact WHERE Id IN : contactIds];
         
@@ -43,7 +44,7 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
                     Customer_Email__c = stripeResponse.email,
                     Customer_Name__c = stripeResponse.name, 
                     Stripe_Customer_ID__c = stripeResponse.id);
-                    insert newStripeCust;
+                    stripeCustomersToInsert.add(newStripeCust);
             } else {
                                 Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
                     .setHttpResponseDetails(res)
@@ -59,6 +60,9 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
            if(!contactsToUpdate.isEmpty()){
                update contactsToUpdate;
            }
+            if(!stripeCustomersToInsert.isEmpty()){
+            insert stripeCustomersToInsert;
+        }
            Logger.saveLog();
     }
 }
