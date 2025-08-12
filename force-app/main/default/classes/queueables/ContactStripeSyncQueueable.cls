@@ -30,10 +30,10 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
             
             HttpResponse res = StripeClient.doPost('/v1/customers', body);
     
-            StripeCustomerDTO stripeResponse = StripeAPIResponseWrappers.parse(res.getBody());
+            StripeAPIResponseWrappers stripeResponse = StripeAPIResponseWrappers.parse(res.getBody());
 
             c.Stripe_Customer_ID__c = stripeResponse.id;
-            contactsToUpdate.add(c);
+            contactsToSyncMap.put(c.Id, c);
 
             Stripe_Customer__c newStripeCust = StripeService.newStripeCustomer(c.Id, stripeResponse);
 
@@ -41,8 +41,8 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
         
         }
 
-        if(!contactsToUpdate.isEmpty()){
-            ContactService.updateContacts(contactsToUpdate);
+        if(!contactsToSyncMap.isEmpty()){
+            ContactService.handleNewContacts(contactsToSyncMap);
         }
 
         if(!stripeCustomers.isEmpty()){

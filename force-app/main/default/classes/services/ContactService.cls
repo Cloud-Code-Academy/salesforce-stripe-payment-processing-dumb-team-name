@@ -6,4 +6,6 @@ public with sharing class ContactService {
           }
           System.enqueueJob(new ContactStripeSyncQueueable(newContactMap));
      }
+
+      
 }
