@@ -4,7 +4,7 @@ public with sharing class ContactTriggerHandler extends TriggerHandler {
 
     public ContactTriggerHandler() {
         this.newContactMap = (Map<Id, Contact>) Trigger.newMap;
-        this.setMaxLoopCount(1);
+        //this.setMaxLoopCount(2);
     }
     
     public override void afterInsert(){

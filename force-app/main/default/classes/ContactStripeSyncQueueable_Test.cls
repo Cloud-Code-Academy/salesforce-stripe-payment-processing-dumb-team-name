@@ -9,11 +9,12 @@ private class ContactStripeSyncQueueable_Test {
     // Utility to build a standard Contact map for input
     private static Map<Id, Contact> createContactsAndMap(Integer howMany) {
         List<Contact> toInsert = new List<Contact>();
+        String uniqueSuffix = String.valueOf(Crypto.getRandomInteger()) + Datetime.now().getTime();
         for (Integer i = 0; i < howMany; i++) {
             toInsert.add(new Contact(
                 FirstName = 'First' + i,
                 LastName = 'Last' + i,
-                Email = 'user' + i + '@example.com'
+                Email = 'user' + i + '_'+ uniqueSuffix + '@example.com'
             ));
         }
         insert toInsert;
@@ -46,7 +47,8 @@ private class ContactStripeSyncQueueable_Test {
             res.setStatusCode(200);
             res.setStatus('OK');
             // Use static values; the implementation only uses id/email/name
-            res.setBody('{"id":"cus_test_123","email":"synced@example.com","name":"Synced Name"}');
+            res.setBody(
+                '{"id":"cus_test_'+ String.valueOf(Math.abs(Crypto.getRandomInteger())) + '","email":"synced@example.com","name":"Synced Name"}');
             return res;
         }
     }
