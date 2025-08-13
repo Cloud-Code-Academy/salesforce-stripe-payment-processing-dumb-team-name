@@ -1,3 +1,8 @@
+/**
+ * @description - Wrapper classes for Stripe API requests
+ * @author - Jason Towers and Jonathan Lyles
+ * @date - August 11, 2025
+ */
 public with sharing class StripeAPIRequestWrapper {
     public String fullName;
     public String email;

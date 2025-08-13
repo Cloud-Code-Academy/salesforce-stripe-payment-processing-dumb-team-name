@@ -1,3 +1,9 @@
+/**
+ * @description - Wrapper classes for Stripe API responses
+ * @author - Jason Towers
+ * @date - August 13, 2025
+ */
+
 public with sharing class StripeAPIResponseWrappers {    
 
     public String id {get;set;}

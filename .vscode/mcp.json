@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "Salesforce DX": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@salesforce/mcp", "--orgs", "DumbTeamName", "--toolsets", "all"]
+    }
+  }
+}

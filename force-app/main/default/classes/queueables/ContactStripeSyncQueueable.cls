@@ -1,17 +1,10 @@
 public with sharing class ContactStripeSyncQueueable implements Queueable, Database.AllowsCallouts{
 
-    private IStripeClient stripeClient;
-
-    private Map<Id, Contact> contactsToSyncMap;
+    private IStripeStrategy strategy;
+    public Map<Id, Contact> contactsToSyncMap;
 
     public ContactStripeSyncQueueable(Map<Id, Contact> contactsToSyncMap){
-        this.contactsToSyncMap = contactsToSyncMap;
-    }
-
-    // For tests, inject the mock
-    public ContactStripeSyncQueueable(Map<Id, Contact> contactsToSyncMap, IStripeClient stripeClient) {
-        this.contactsToSyncMap = contactsToSyncMap;
-        this.stripeClient = stripeClient;
+        this.contactsToSyncMap = contactsToSyncMap.deepClone();
     }
 
     public void execute(QueueableContext qc){
@@ -22,23 +15,36 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
          
         for(Contact c : contacts){
 
-            StripeAPIRequestWrapper req = new StripeAPIRequestWrapper(
-            c.FirstName + ' ' + c.LastName,
-            c.Email
-            );
-            String body = req.toUrlEncodedString();
+            String name;
+            String email;
             
-            HttpResponse res = StripeClient.doPost('/v1/customers', body);
-    
-            StripeAPIResponseWrappers stripeResponse = StripeAPIResponseWrappers.parse(res.getBody());
+            try{
+                if(c.FirstName == null || c.LastName == null){
+                    throw new ContactStripeQueueableException('First and last name values are required to create a Stripe Customer record');
+                }else{
+                    name = c.FirstName + ' ' + c.LastName;
+                    email = c.Email;
+                }
+            }catch(Exception e){
+                Logger.error(e.getMessage());
+            }
+            
+            
+            this.strategy = new CreateCustomerStrategy(name, c.email);
 
-            c.Stripe_Customer_ID__c = stripeResponse.id;
+            
+            StripeAPIClient createClient = new StripeAPIClient(this.strategy);
+            
+            HttpResponse res = createClient.run();
+
+            StripeAPIResponseWrappers stripeCustomerResponse = StripeAPIResponseWrappers.parse(res.getBody());
+            
+            Stripe_Customer__c newStripeCustomer = StripeService.newStripeCustomer(c.Id, stripeCustomerResponse);
+
+            stripeCustomers.add(newStripeCustomer);
+
             contactsToSyncMap.put(c.Id, c);
 
-            Stripe_Customer__c newStripeCust = StripeService.newStripeCustomer(c.Id, stripeResponse);
-
-            stripeCustomers.add(newStripeCust);
-        
         }
 
         if(!contactsToSyncMap.isEmpty()){
@@ -47,7 +53,10 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
 
         if(!stripeCustomers.isEmpty()){
             StripeService.insertNewStripeCustomers(stripeCustomers);
-    }
+        }
+        
         Logger.saveLog();
     }
+
+    public class ContactStripeQueueableException extends Exception{}
 }
