@@ -204,4 +204,28 @@ private class ContactStripeSyncQueueable_Test {
         // No Stripe records linked to the fake id can exist
         System.assertEquals(0, [SELECT COUNT() FROM Stripe_Customer__c WHERE Contact__c = :fakeId], 'No records should be created for non-existent Id');
     }
+
+    @IsTest
+    static void test_QueueableJobSuccess(){
+
+        // Insert a contact. This should fire ContactTrigger, which calls ContactTriggerHandler, which calls ContactService.handleNewContacts, which calls ContactStripeSyncQueueable
+        Contact c = new Contact();
+        c.FirstName = 'Test Test';
+        c.LastName = 'Last Last';
+        c.Email = 'test@gmail.com';
+
+        Test.startTest();
+
+        insert c;
+
+        Test.stopTest();
+
+        // There should be a Stripe Customer record created
+
+        Stripe_Customer__c customer = [SELECT Id, Customer_Name__c, Customer_Email__c, Stripe_Customer_ID__c, Contact__c FROM Stripe_Customer__c WHERE Contact__c = :c.Id LIMIT 1] ?? null;
+        Integer customerCount = [SELECT COUNT() FROM Stripe_Customer__c WHERE Contact__c = :c.Id LIMIT 1];
+        Assert.areNotEqual(null, customer, 'Error: A Stripe_Customer__c record was not created with the expected Contact__c Id (Not null)');
+        Assert.areEqual(1, customerCount, 'Error: A Stripe_Customer__c record was not created with the expected Contact__c Id (Count)');
+        
+    }
 }

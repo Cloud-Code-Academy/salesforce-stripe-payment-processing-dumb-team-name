@@ -20,9 +20,10 @@ public with sharing class StripeService {
         return stripeCustomer;                     
     }
 
-    public static void insertNewStripeCustomers(List<Stripe_Customer__c> stripeCustomersToInsert){
+    public static List<Stripe_Customer__c> insertNewStripeCustomers(List<Stripe_Customer__c> stripeCustomersToInsert){
         insert stripeCustomersToInsert;
         System.debug(stripeCustomersToInsert);
+        return stripeCustomersToInsert;
     }
 
     
