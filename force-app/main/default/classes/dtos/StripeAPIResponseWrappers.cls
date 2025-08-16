@@ -1,11 +1,34 @@
-/**
- * @description - Wrapper classes for Stripe API responses
- * @author - Jason Towers
- * @date - August 13, 2025
- */
-
 public with sharing class StripeAPIResponseWrappers {    
-
+    
+//     {
+//   "id": "cus_SpLNkcKMswwoBy",
+//   "object": "customer",
+//   "address": null,
+//   "balance": 0,
+//   "created": 1754622586,
+//   "currency": null,
+//   "default_source": null,
+//   "delinquent": false,
+//   "description": null,
+//   "discount": null,
+//   "email": "jasonmtowers@gmail.com",
+//   "invoice_prefix": "FRUGU9TA",
+//   "invoice_settings": {
+//     "custom_fields": null,
+//     "default_payment_method": null,
+//     "footer": null,
+//     "rendering_options": null
+//   },
+//   "livemode": false,
+//   "metadata": {},
+//   "name": "Jason Towers",
+//   "next_invoice_sequence": 1,
+//   "phone": null,
+//   "preferred_locales": [],
+//   "shipping": null,
+//   "tax_exempt": "none",
+//   "test_clock": null
+// }
     public String id {get;set;}
     public String objectType {get;set;} //object is a reserved word
     public Address address {get;set;}
@@ -27,6 +50,8 @@ public with sharing class StripeAPIResponseWrappers {
     public Shipping shipping { get; set; }
     public String tax_exempt { get; set; }  
     public String test_clock { get; set; }
+
+    
 
     public class Address{
         public String city {get;set;}
@@ -68,5 +93,5 @@ public with sharing class StripeAPIResponseWrappers {
     }
     return res;
 
-    }
+}
 }
