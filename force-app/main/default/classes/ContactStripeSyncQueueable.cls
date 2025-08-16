@@ -25,8 +25,8 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
             request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
             request.setBody(body);
 
-             Logger.info('Sending Stripe customer creation request', contactToSync)
-                .setHttpRequestDetails(request, new List<String>{ 'Authorization', 'Content-Type' });
+             //Logger.info('Sending Stripe customer creation request', contactToSync)
+             //   .setHttpRequestDetails(request, new List<String>{ 'Authorization', 'Content-Type' });
 
 
             Http http = new Http();
@@ -46,14 +46,14 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
                     Stripe_Customer_ID__c = stripeResponse.id);
                     stripeCustomersToInsert.add(newStripeCust);
             } else {
-                                Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
-                    .setHttpResponseDetails(res)
-                    .setExceptionDetails(new CalloutException('Status: ' + res.getStatus() + ' Body: ' + res.getBody()));
+                    //            Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
+                    //.setHttpResponseDetails(res)
+                    //.setExceptionDetails(new CalloutException('Status: ' + res.getStatus() + ' Body: ' + res.getBody()));
             }
 
             } catch (Exception e) {
-                Logger.error('Exception during Stripe callout', contactToSync)
-                  .setExceptionDetails(e);           
+               // Logger.error('Exception during Stripe callout', contactToSync)
+               //  .setExceptionDetails(e);           
         }
     }
 
@@ -63,6 +63,6 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
             if(!stripeCustomersToInsert.isEmpty()){
             insert stripeCustomersToInsert;
         }
-           Logger.saveLog();
+          // Logger.saveLog();
     }
 }
