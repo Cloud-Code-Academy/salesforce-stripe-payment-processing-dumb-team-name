@@ -1,10 +1,131 @@
-@RestResource(urlMapping='/stripe/webhooks/*')
+/**
+ * @description Listens and handle certain Stripe events
+ * @author Jonathan Lyles
+ * @description August 17, 2025
+ */
+
+@RestResource(urlMapping='/webhook/stripe/*')
 global without sharing class StripeEventsWebhook {
+
+    //TODO: Do we want to react to create events? Also, what other events do we want to listen for?
+
+    // This is the list of events we are tracking
+    public enum types {
+        customer_created,
+        customer_updated,
+        customer_deleted,
+        customer_subscription_created,
+        customer_subscription_updated,
+        customer_subscription_deleted,
+        customer_subscription_paused,
+        payment_intent_succeeded
+    }
+
     
-    @HttpPost
-    global static void returnBody(){
-        RestRequest req = RestContext.request;
-        String body = req.requestBody.toString();
-        system.debug('This is the body' + body);
+    // Maps each event to its respective strategy
+    private static Map<StripeEventsWebhook.types, IStripeWebhookStrategy> eventTypeStrategyMap;
+    
+    static {
+        eventTypeStrategyMap = new Map<StripeEventsWebhook.types, IStripeWebhookStrategy>();
+        eventTypeStrategyMap.put(types.customer_created, new StripeCustomerWebhookStrategy());
+        eventTypeStrategyMap.put(types.customer_updated, new StripeCustomerWebhookStrategy());
+        eventTypeStrategyMap.put(types.customer_deleted, new StripeCustomerWebhookStrategy());
+        eventTypeStrategyMap.put(types.customer_subscription_created, new StripeSubscriptionWebhookStrategy()); 
+        eventTypeStrategyMap.put(types.customer_subscription_updated, new StripeSubscriptionWebhookStrategy()); 
+        eventTypeStrategyMap.put(types.customer_subscription_paused, new StripeSubscriptionWebhookStrategy()); 
+        eventTypeStrategyMap.put(types.payment_intent_succeeded, new StripePaymentWebhookStrategy()); 
+    }
+    
+ /** 
+  * @description Handles events by Stripe's webhook sent via Http Post. Determines the event type and calls the appropriate strategy. 
+   */   
+ @HttpPost 
+ global static Integer handleWebhookPost(){
+    RestRequest request = RestContext.request;
+    RestResponse response = RestContext.response;
+
+    // Step 1: Get the body
+    String body = request.requestBody.toString();
+
+    // Step 2: Get signature from headers
+    String sigHeader = request.headers.get('Stripe-Signature');
+    
+    // Step 3: Verify signature
+    String secret = 'whsec_SEg85S3RHHYsPGKBl0L1a1dHKeq9yoof';
+    // TODO: don't leave the secret here
+    Boolean isValid = verifyStripeSignature(body, sigHeader, secret);
+
+    if (isValid) {
+        // Process payload
+        Logger.info('Webhook is valid: ' + body);
+        response.statusCode = 200;
+    } else {
+        Logger.error('Invalid signature');
+        response.statusCode = 401;
+    }
+
+    StripeWebhookRequestOuterWrapper outerWrapper = (StripeWebhookRequestOuterWrapper) JSON.deserialize(request.requestBody.toString(), StripeWebhookRequestOuterWrapper.class);
+    Logger.info('Request type is: ' + outerWrapper.type);
+    Logger.info('Stripe Webhook Request: ' +  JSON.serialize(request));
+
+    
+    // Convert "customer.created" -> "customer_created"
+        String strategyKey = outerWrapper.type.replaceAll('\\.', '_');
+        // Use Apex’s built-in method to get the enum value dynamically
+        StripeEventsWebhook.types enumValue = StripeEventsWebhook.types.valueOf(strategyKey);
+
+        // Dynamically select and execute the webhook strategy
+        // TODO: Once we know the strategy, we'll pass it to a queueable to process
+
+        IStripeWebhookStrategy strategyObject = eventTypeStrategyMap.get(enumValue);
+        if (strategyObject != null) {
+            strategyObject.handle(body);
+        } else {
+            Logger.error('No strategy found for event type: ' + outerWrapper.type);
+        }
+
+    Logger.saveLog();
+    return response.statusCode;
+
+ }
+/**
+ * @description Verifies the Stripe webhook signature using HMAC-SHA256.
+ *
+ * @param body      The raw request payload received from Stripe.
+ * @param sigHeader The `Stripe-Signature` header from the incoming request.
+ *                  Expected format: t=<timestamp>,v1=<signature>[,...]
+ * @param secret    The Stripe webhook signing secret used to compute the hash.
+ * @return true if the signature is valid, otherwise false.
+ */
+    global static Boolean verifyStripeSignature(String body, String sigHeader, String secret){
+    
+        if (sigHeader == null) return false;
+
+        // Parse header (t=timestamp,v1=signature,...)
+        Map<String, String> sigMap = new Map<String, String>();
+        for (String part : sigHeader.split(',')) {
+            List<String> kv = part.split('=');
+            if (kv.size() == 2) sigMap.put(kv[0], kv[1]);
+        }
+
+        if (!sigMap.containsKey('t') || !sigMap.containsKey('v1')) 
+            {
+                return false;
+            }
+
+        String timestamp = sigMap.get('t');
+        String expectedSig = sigMap.get('v1');
+
+        // Build signed payload string
+        String signedPayload = timestamp + '.' + body;
+
+        // Compute HMAC-SHA256
+        Blob key = Blob.valueOf(secret);
+        Blob message = Blob.valueOf(signedPayload);
+        Blob hash = Crypto.generateMac('HMACSHA256', message, key);
+        String hashHex = EncodingUtil.convertToHex(hash);
+
+        // Compare
+        return hashHex.equalsIgnoreCase(expectedSig);
     }
 }
