@@ -13,26 +13,35 @@ public with sharing class StripeWebhookSubscriptionWrapper {
     public Map<String,Object> metadata;       // Could include Checkout URL, Checkout Session ID, etc.
 
     public class Items {
+
         public List<SubscriptionItem> data;
+    
     }
 
     public class SubscriptionItem {
+    
         public String id;
         public Plan plan; 
         public Price price;
         public Integer quantity;
+    
     }
 
     public class Plan {
+    
         public String id;
         public String nickname;               // Product/Plan Name
         public Integer amount;                // Amount in cents
         public String currency_x;               // Currency
+    
     }
 
     public class Price {
+    
         public String id;
         public Integer unit_amount;           // Amount in cents
         public String currency_x;
+    
     }
+
 }
