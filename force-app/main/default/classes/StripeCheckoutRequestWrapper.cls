@@ -5,6 +5,7 @@ public with sharing class StripeCheckoutRequestWrapper {
         public String mode;
         public String success_url;
         public String cancel_url;
+        public List<String> payment_method_types = new List<String>{'card', 'link'};
 
     public StripeCheckoutRequestWrapper(
         String customer,
@@ -13,7 +14,7 @@ public with sharing class StripeCheckoutRequestWrapper {
         String cancelUrl,
         List<LineItem> lineItems,
         Map<String, String> metadata,
-        String subscriptioId
+        String subscriptionId
     ) {
         this.customer = customer;
         this.mode = mode;
@@ -23,7 +24,7 @@ public with sharing class StripeCheckoutRequestWrapper {
         if(metadata == null) {
             metadata = new Map<String,String>();
         }
-        metadata.put('Salesforce_Subscription_Id', subscriptioId);       
+        metadata.put('Salesforce_Subscription_Id', subscriptionId);       
         this.metadata = metadata;
     }
 
@@ -71,6 +72,9 @@ public with sharing class StripeCheckoutRequestWrapper {
             if(!String.isBlank(key) && !String.isBlank(value)) {
                 params.add('metadata[' + EncodingUtil.urlEncode(key,'UTF-8') + ']=' + EncodingUtil.urlEncode(value,'UTF-8'));
             }
+        }
+        for(Integer i = 0; i < payment_method_types.size(); i++) {
+            params.add('payment_method_types[' + i + ']=' + EncodingUtil.urlEncode(payment_method_types[i],'UTF-8'));
         }
         return String.join(params,'&');
     }
