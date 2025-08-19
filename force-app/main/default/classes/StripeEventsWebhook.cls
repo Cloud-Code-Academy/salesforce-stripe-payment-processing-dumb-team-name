@@ -14,8 +14,9 @@ global without sharing class StripeEventsWebhook {
         customer_subscription_updated,
         customer_subscription_deleted,
         customer_subscription_paused,
-        payment_intent_succeeded
-
+        customer_subscription_resumed,
+        invoice_paid,
+        invoice_payment_failed
     }
 
     // Maps each event to its respective strategy
@@ -29,8 +30,10 @@ global without sharing class StripeEventsWebhook {
         eventTypeStrategyMap.put(types.customer_subscription_updated, new StripeSubscriptionWebhookStrategy()); 
         eventTypeStrategyMap.put(types.customer_subscription_deleted, new StripeSubscriptionWebhookStrategy()); 
         eventTypeStrategyMap.put(types.customer_subscription_paused, new StripeSubscriptionWebhookStrategy()); 
-        eventTypeStrategyMap.put(types.payment_intent_succeeded, new StripePaymentWebhookStrategy()); 
-    
+        eventTypeStrategyMap.put(types.customer_subscription_resumed, new StripeSubscriptionWebhookStrategy()); 
+        eventTypeStrategyMap.put(types.invoice_paid, new StripePaymentWebhookStrategy()); 
+        eventTypeStrategyMap.put(types.invoice_payment_failed, new StripePaymentWebhookStrategy()); 
+
     }
     
  /** 
@@ -57,30 +60,44 @@ global static Integer handleWebhookPost() {
     if (isValid) {
         // Process payload
         Logger.info('Webhook is valid: ' + body);
-        response.statusCode = 200;
+    
     } else {
         Logger.error('Invalid signature');
         response.statusCode = 401;
+
     }
 
-    StripeWebhookRequestOuterWrapper outerWrapper = (StripeWebhookRequestOuterWrapper) JSON.deserialize(request.requestBody.toString(), StripeWebhookRequestOuterWrapper.class);
-    Logger.info('Request type is: ' + outerWrapper.type);
-    Logger.info('Stripe Webhook Request: ' +  JSON.serialize(request));
+    // Skip this code block if authorization failed (i.e. status code = 401)
+    if(response.statusCode != 401) {
 
-    // Convert "customer.created" -> "customer_created"
-    String strategyKey = outerWrapper.type.replaceAll('\\.', '_');
-    // Use Apex’s built-in method to get the enum value dynamically
-    StripeEventsWebhook.types enumValue = StripeEventsWebhook.types.valueOf(strategyKey);
+        StripeWebhookRequestOuterWrapper outerWrapper = (StripeWebhookRequestOuterWrapper) JSON.deserialize(request.requestBody.toString(), StripeWebhookRequestOuterWrapper.class);
+        Logger.info('Request type is: ' + outerWrapper.type);
+        Logger.info('Stripe Webhook Request: ' +  JSON.serialize(request));
 
-    // Dynamically select and execute the webhook strategy
-    // TODO: Once we know the strategy, we'll pass it to a queueable to process
+        // Convert "customer.created" -> "customer_created"
+        String strategyKey = outerWrapper.type.replaceAll('\\.', '_');
+        // Use Apex’s built-in method to get the enum value dynamically
+        StripeEventsWebhook.types enumValue = StripeEventsWebhook.types.valueOf(strategyKey);
 
-    IStripeWebhookStrategy strategyObject = eventTypeStrategyMap.get(enumValue);
-    if (strategyObject != null) {
-        strategyObject.handle(body);
-    } else {
-        Logger.error('No strategy found for event type: ' + outerWrapper.type);
-        response.statusCode = 404;
+        // Dynamically select the strategy
+        IStripeWebhookStrategy strategyObject = eventTypeStrategyMap.get(enumValue);
+
+
+        if (strategyObject != null) {
+
+            StripeWebhookQueueable stripeWebhookQueueable = new StripeWebhookQueueable(strategyObject, body);
+            System.enqueueJob(stripeWebhookQueueable);
+            
+            // TODO: Any required checks here?
+            response.statusCode = 201;
+
+        } else {
+
+            Logger.error('No strategy found for event type: ' + outerWrapper.type);
+            response.statusCode = 404;
+
+        }
+
     }
 
     Logger.saveLog();
