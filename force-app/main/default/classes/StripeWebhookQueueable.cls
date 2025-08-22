@@ -1,8 +1,9 @@
 public with sharing class StripeWebhookQueueable implements Queueable {
 
-    IStripeWebhookStrategy strategy;
-    String requestBody;
-
+    public IStripeWebhookStrategy strategy;
+    private String requestBody;
+    public Integer responseCode;
+    
     public StripeWebhookQueueable(IStripeWebhookStrategy strategy, String requestBody) {
 
         this.strategy = strategy;
@@ -12,8 +13,9 @@ public with sharing class StripeWebhookQueueable implements Queueable {
 
     public void execute(QueueableContext qc) {
 
-        strategy.handle(requestBody);
+        this.responseCode = strategy.handle(requestBody);
 
-    } 
+    }
+
 
 }

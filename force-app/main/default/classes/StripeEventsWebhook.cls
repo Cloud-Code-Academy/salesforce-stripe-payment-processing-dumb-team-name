@@ -64,7 +64,7 @@ global static Integer handleWebhookPost() {
     } else {
         Logger.error('Invalid signature');
         response.statusCode = 401;
-
+    
     }
 
     // Skip this code block if authorization failed (i.e. status code = 401)
@@ -86,10 +86,10 @@ global static Integer handleWebhookPost() {
         if (strategyObject != null) {
 
             StripeWebhookQueueable stripeWebhookQueueable = new StripeWebhookQueueable(strategyObject, body);
+
             System.enqueueJob(stripeWebhookQueueable);
-            
-            // TODO: Any required checks here?
-            response.statusCode = 201;
+
+            response.statusCode = stripeWebhookQueueable?.responseCode;
 
         } else {
 
