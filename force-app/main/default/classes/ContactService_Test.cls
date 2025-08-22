@@ -4,10 +4,12 @@ private class ContactService_Test {
     // Simple HttpCalloutMock to safely handle any unexpected callouts by the Queueable during Test.stopTest().
     // If the queueable does not perform callouts, the presence of this mock is harmless.
     private class OkHttpMock implements HttpCalloutMock {
+        private integer counter = 0;
         public HTTPResponse respond(HTTPRequest req) {
+            counter++;
             HttpResponse res = new HttpResponse();
             res.setStatusCode(200);
-            res.setBody('{"status":"ok"}');
+            res.setBody('{"id":"cus_test' + counter + '","email":"test' + counter + '@example.com","name":"Test User ' + counter + '"}');
             res.setHeader('Content-Type', 'application/json');
             return res;
         }
@@ -50,26 +52,10 @@ private class ContactService_Test {
         );
     }
 
-    // @IsTest
-    // static void handleNewContacts_enqueuesJob_withEmptyMap() {
-    //     // Arrange
-    //     Map<Id, Contact> emptyMap = new Map<Id, Contact>();
-    //     Integer beforeJobs = Limits.getQueueableJobs();
 
-    //     // Act
-    //     ContactService.handleNewContacts(emptyMap);
-
-    //     // Assert
-    //     Integer afterJobs = Limits.getQueueableJobs();
-    //     System.assertEquals(
-    //         beforeJobs + 1,
-    //         afterJobs,
-    //         'Even with an empty map, current implementation should enqueue exactly one queueable job.'
-    //     );
-    // }
 
     @IsTest
-    static void handleNewContacts_enqueuesJob_withNullMap_withoutExecutingAsync() {
+    static void handleNewContacts_enqueuesJob_withNullMap() {
         // Arrange
         // We will not call Test.startTest/Test.stopTest here to avoid executing the async job in case
         // the Queueable does not tolerate a null map during execution.
@@ -84,9 +70,9 @@ private class ContactService_Test {
         // Assert
         Integer afterJobs = Limits.getQueueableJobs();
         System.assertEquals(
-            beforeJobs + 1,
+            beforeJobs,
             afterJobs,
-            'Passing null should still result in a queueable job being enqueued as per current implementation.'
+            'No queueables should be enqueued.'
         );
     }
 

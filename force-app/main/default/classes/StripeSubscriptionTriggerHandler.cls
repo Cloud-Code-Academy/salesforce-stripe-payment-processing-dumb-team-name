@@ -10,4 +10,8 @@ public with sharing class StripeSubscriptionTriggerHandler extends TriggerHandle
     public override void afterInsert(){
             StripeSubscriptionService.handleNewSubscriptions(newSubscriptionMap);
     }
+
+    public override void afterUpdate() {
+        
+    }
 }

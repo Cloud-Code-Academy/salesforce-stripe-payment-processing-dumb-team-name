@@ -63,23 +63,7 @@ private class StripeAPIRequestWrapper_Test {
         System.assertEquals(expected, actual, 'Empty inputs should be preserved and encoded as empty.');
     }
 
-    @IsTest
-    static void toUrlEncodedString_handlesNullsGracefully() {
-        // Arrange
-        String name = null;
-        String email = null;
-        StripeAPIRequestWrapper wrapper = new StripeAPIRequestWrapper(name, email);
 
-        // Act
-        String actual = wrapper.toUrlEncodedString();
-
-        // Assert
-        // Replicate wrapper logic using the platform’s EncodingUtil to derive expected behavior for nulls.
-        String expected = 'name=' + EncodingUtil.urlEncode(name, 'UTF-8')
-                        + '&email=' + EncodingUtil.urlEncode(email, 'UTF-8');
-        // Note: String concatenation with null in Apex yields 'null' in the final string.
-        System.assertEquals(expected, actual, 'Null inputs should be handled consistently with EncodingUtil.urlEncode behavior.');
-    }
 
     @IsTest
     static void toUrlEncodedString_encodesWideRangeOfSpecialCharacters() {

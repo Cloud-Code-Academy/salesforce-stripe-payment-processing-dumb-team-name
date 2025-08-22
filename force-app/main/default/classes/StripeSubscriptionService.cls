@@ -6,4 +6,13 @@ public with sharing class StripeSubscriptionService {
           }
           System.enqueueJob(new StripeCheckoutQueueable(newSubscriptionMap));
      }
-    }
+
+     public static void handleUpdatedSubscriptions(Map<Id, Stripe_Subscription__c> updatedSubscriptionMap) {
+          if (updatedSubscriptionMap == null || updatedSubscriptionMap.isEmpty()) {
+               return;
+          }
+          System.enqueueJob(new StripeUpdateSubscriptionQueueable(updatedSubscriptionMap));
+     }
+}
+     
+    

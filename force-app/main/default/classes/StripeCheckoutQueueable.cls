@@ -35,6 +35,7 @@ private Map<Id, Stripe_Subscription__c> newSubscriptionsMap;
             lineItems.add(new StripeCheckoutRequestWrapper.LineItem(sub.Stripe_Price_ID__c, 1));
 
             Map<String,String> metadata = new Map<String,String>();
+            Map<String,String> subscriptionMetadata = new Map<String,String>();
 
             StripeCheckoutRequestWrapper requestWrapper = new StripeCheckoutRequestWrapper(
                 stripeCustomerId,
@@ -43,8 +44,11 @@ private Map<Id, Stripe_Subscription__c> newSubscriptionsMap;
                 'http://wwww.yahoo.com',
                 lineItems,
                 metadata,
-                String.valueOf(sub.Id)
+                String.valueOf(sub.Id),
+                subscriptionMetadata
             );
+
+
 
             String payload = requestWrapper.toFormEncoded();
 
