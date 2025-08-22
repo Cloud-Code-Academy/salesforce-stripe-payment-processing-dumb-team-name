@@ -5,6 +5,8 @@ public with sharing class StripeCheckoutRequestWrapper {
         public String mode;
         public String success_url;
         public String cancel_url;
+        public List<String> payment_method_types = new List<String>{'card', 'link'};
+        public SubscriptionData subscription_data;
 
     public StripeCheckoutRequestWrapper(
         String customer,
@@ -13,7 +15,8 @@ public with sharing class StripeCheckoutRequestWrapper {
         String cancelUrl,
         List<LineItem> lineItems,
         Map<String, String> metadata,
-        String subscriptioId
+        String subscriptionId,
+        Map<String, String> subscriptionMetadata
     ) {
         this.customer = customer;
         this.mode = mode;
@@ -23,9 +26,13 @@ public with sharing class StripeCheckoutRequestWrapper {
         if(metadata == null) {
             metadata = new Map<String,String>();
         }
-        metadata.put('Salesforce_Subscription_Id', subscriptioId);       
+        metadata.put('Salesforce_Subscription_Id', subscriptionId);       
         this.metadata = metadata;
-    }
+
+        subscriptionMetadata.put('Salesforce_Subscription_Id', subscriptionId);
+        this.subscription_data = new SubscriptionData(subscriptionMetadata);
+        }
+    
 
     public class LineItem {
         public String price;
@@ -44,6 +51,17 @@ public with sharing class StripeCheckoutRequestWrapper {
             this.quantity = quantity;
         }
     }
+
+public class SubscriptionData {
+    public Map<String, String> metadata = new Map<String, String>();
+
+    // key = map key, value = map value
+        public SubscriptionData(Map<String,String> metadataMap) {
+        if(metadataMap != null) {
+            metadata.putAll(metadataMap);
+        }
+    }
+}
 
     public String toFormEncoded() {
         List<String> params = new List<String>();
@@ -72,6 +90,14 @@ public with sharing class StripeCheckoutRequestWrapper {
                 params.add('metadata[' + EncodingUtil.urlEncode(key,'UTF-8') + ']=' + EncodingUtil.urlEncode(value,'UTF-8'));
             }
         }
+        for(Integer i = 0; i < payment_method_types.size(); i++) {
+            params.add('payment_method_types[' + i + ']=' + EncodingUtil.urlEncode(payment_method_types[i],'UTF-8'));
+        }
+
+        for(String key : subscription_data.metadata.keySet()) {
+        String value = subscription_data.metadata.get(key);
+        params.add('subscription_data[metadata][' + EncodingUtil.urlEncode(key,'UTF-8') + ']=' + EncodingUtil.urlEncode(value,'UTF-8'));
+}
         return String.join(params,'&');
     }
 }

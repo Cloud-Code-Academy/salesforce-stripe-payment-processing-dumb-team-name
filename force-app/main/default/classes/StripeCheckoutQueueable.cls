@@ -15,6 +15,7 @@ private Map<Id, Stripe_Subscription__c> newSubscriptionsMap;
                    Stripe_Customer__c,
                    Stripe_Customer__r.Stripe_Customer_ID__c,
                    Stripe_Checkout_Session_Id__c,
+                   Stripe_Customer__r.Customer_Email__c,
                    Sync_Status__c
             FROM Stripe_Subscription__c
             WHERE Id IN :newSubscriptionsMap.keySet()
@@ -34,6 +35,7 @@ private Map<Id, Stripe_Subscription__c> newSubscriptionsMap;
             lineItems.add(new StripeCheckoutRequestWrapper.LineItem(sub.Stripe_Price_ID__c, 1));
 
             Map<String,String> metadata = new Map<String,String>();
+            Map<String,String> subscriptionMetadata = new Map<String,String>();
 
             StripeCheckoutRequestWrapper requestWrapper = new StripeCheckoutRequestWrapper(
                 stripeCustomerId,
@@ -42,8 +44,11 @@ private Map<Id, Stripe_Subscription__c> newSubscriptionsMap;
                 'http://wwww.yahoo.com',
                 lineItems,
                 metadata,
-                String.valueOf(sub.Id)
+                String.valueOf(sub.Id),
+                subscriptionMetadata
             );
+
+
 
             String payload = requestWrapper.toFormEncoded();
 
@@ -61,10 +66,12 @@ private Map<Id, Stripe_Subscription__c> newSubscriptionsMap;
                 if(res.getStatusCode() == 200) {
                     StripeCheckoutResponseWrapper responseWrapper = (StripeCheckoutResponseWrapper)JSON.deserialize(res.getBody(), StripeCheckoutResponseWrapper.class);
 
+                    sub.Stripe_Subscription_ID__c = responseWrapper.subscription;
                     sub.Stripe_Checkout_Session_Id__c = responseWrapper.id;
                     sub.Checkout_URL__c = responseWrapper.url;
                     sub.Sync_Status__c = 'Checkout Created';
                     subscriptionsToUpdate.add(sub);
+                    StripeEmailService.sendCheckoutSessionEmail(sub, responseWrapper.url);
                 } else {
                     Logger.error('Stripe Subscription callout failed for subscription ' + sub.Id + 
                         ' with status ' + res.getStatusCode() + ': ' + res.getBody());
@@ -80,6 +87,8 @@ private Map<Id, Stripe_Subscription__c> newSubscriptionsMap;
         if(!subscriptionsToUpdate.isEmpty()) {
             update subscriptionsToUpdate;
         }
+
+        
     }
 }
 
