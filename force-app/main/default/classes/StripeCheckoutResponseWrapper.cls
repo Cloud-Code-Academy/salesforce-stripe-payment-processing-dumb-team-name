@@ -13,4 +13,19 @@ public with sharing class StripeCheckoutResponseWrapper {
 
     public Map<String,String> metadata;
 
+    // public class SubscriptionItems {
+    //     public String object;
+    //     public List<SubscriptionItem> data;
+    //  }
+    //  public class SubscriptionItem {
+    //     public String id;
+    //     public String object;
+    //     public Price price;
+    //     public Integer quantity;
+    //  }
+
+    //  public class Price {
+    //     public String id;
+    //     public String product;
+    //  }
 }
