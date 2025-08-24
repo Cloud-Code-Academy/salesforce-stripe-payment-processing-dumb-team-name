@@ -1,5 +1,4 @@
 public interface IStripeWebhookStrategy {
 
-    Integer handle(String requestBody);
-
+  Integer handle(String requestBody);
 }
