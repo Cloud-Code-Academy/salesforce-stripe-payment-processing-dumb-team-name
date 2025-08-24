@@ -81,16 +81,12 @@ global without sharing class StripeEventsWebhook {
       return response.statusCode = 401;
     }
 
-    StripeWebhookRequestOuterWrapper outerWrapper = (StripeWebhookRequestOuterWrapper) JSON.deserialize(
-      request.requestBody.toString(),
-      StripeWebhookRequestOuterWrapper.class
-    );
-
-    Logger.info('Request type is: ' + outerWrapper.type);
-    Logger.info('Stripe Webhook Request: ' + JSON.serialize(request));
+    String eventType = StripeWebhookRequestOuterWrapper.getEventType(body);
 
     // Convert "customer.created" -> "customer_created"
-    String strategyKey = outerWrapper.type.replaceAll('\\.', '_');
+    String strategyKey = StripeWebhookRequestOuterWrapper.normaliseEventType(
+      eventType
+    );
 
     // Use Apex’s built-in method to get the enum value dynamically
 
@@ -162,7 +158,7 @@ global without sharing class StripeEventsWebhook {
    * @return true if the signature is valid, otherwise false.
    */
 
-  global static Boolean verifyStripeSignature(
+  public static Boolean verifyStripeSignature(
     String body,
     String sigHeader,
     String secret

@@ -1,6 +1,7 @@
 public with sharing class StripeWebhookQueueable implements Queueable, Finalizer {
   IStripeWebhookStrategy strategy;
   String requestBody;
+  Integer attemptCount;
 
   public StripeWebhookQueueable(
     IStripeWebhookStrategy strategy,
@@ -8,6 +9,20 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
   ) {
     this.strategy = strategy;
     this.requestBody = requestBody;
+    this.attemptCount = 1;
+  }
+
+  // Constructor for retry attempts
+  public StripeWebhookQueueable(
+    IStripeWebhookStrategy strategy,
+    String requestBody,
+    Integer attemptCounter
+  ) {
+    {
+      this.strategy = strategy;
+      this.requestBody = requestBody;
+      this.attemptCount = attemptCounter;
+    }
   }
 
   //Queueable implementation
@@ -15,20 +30,19 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
     String jobId = '' + qc.getJobId();
     Logger.info('Begin: executing queueable job: ' + jobId);
 
-    try {
-      // Attach finalizer with same parameters
-      System.attachFinalizer(
-        new StripeWebhookQueueable(this.strategy, this.requestBody)
-      );
+    // Attach finalizer with same parameters
+    System.attachFinalizer(
+      new StripeWebhookQueueable(
+        this.strategy,
+        this.requestBody,
+        this.attemptCount
+      )
+    );
 
-      strategy.handle(requestBody);
-    } catch (Exception e) {
-      Logger.error(
-        'Error executing the job: [' + jobId + ']: ' + e.getMessage()
-      );
-    } finally {
-      Logger.info('Completed: execution of job: ' + jobId);
-    }
+    // If this throws, Salesforce will retry once automatically
+    strategy.handle(requestBody);
+
+    Logger.info('Completed: execution of job: ' + jobId);
 
     // TODO: Review what Justin did in class on Tuesday, Aug 19, to chain the queueable until all records are processed, and do I need to worry about stack depth
   }
@@ -38,11 +52,11 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
   public void execute(FinalizerContext ctx) {
     String parentJobId = '' + ctx.getAsyncApexJobId();
     Logger.info(
-      'Begin: executing finalizer attached to queueable job: ' + parentJobId
+      'Begin: executing finalizer attached for queueable job: ' + parentJobId
     );
 
     if (ctx.getResult() == ParentJobResult.SUCCESS) {
-      System.debug(
+      Logger.info(
         'Parent queueable job [' + parentJobId + '] completed successfully.'
       );
     } else {
@@ -52,15 +66,27 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
           '] failed due to unhandled exception: ' +
           ctx.getException().getMessage()
       );
-      Logger.info('Enqueueing another instance of the queueable...');
-      String newJobId = System.enqueueJob(
-        new StripeWebhookQueueable(this.strategy, this.requestBody)
-      ); // This call fails after 5 times when it hits the chaining limit
-      Logger.info('Enqueued new job: ' + newJobId);
+
+      // Retry up to 5 attempts
+      if (attemptCount < 5) {
+        Integer nextAttempt = attemptCount + 1;
+        Logger.info('Retrying attempt ' + nextAttempt + '...');
+        String newJobId = System.enqueueJob(
+          new StripeWebhookQueueable(
+            this.strategy,
+            this.requestBody,
+            nextAttempt
+          )
+        );
+        Logger.info('Enqueued new job: ' + newJobId);
+      } else {
+        Logger.error('Max attempts reached (5). No further retries.');
+      }
+
+      Logger.info('Completed: finalizer for job: ' + parentJobId);
     }
-    System.debug(
-      'Completed: execution of finalizer attached to queueable job: ' +
-      parentJobId
-    );
+  }
+
+  public class StripeWebhookQueueableException extends Exception {
   }
 }
