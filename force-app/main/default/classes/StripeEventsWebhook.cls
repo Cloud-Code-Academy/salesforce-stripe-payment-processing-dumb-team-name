@@ -106,6 +106,17 @@ global without sharing class StripeEventsWebhook {
 
     IStripeWebhookStrategy strategyObject = eventTypeStrategyMap.get(enumValue);
 
+    try {
+      if (strategyObject == null) {
+        throw new StripeEventsWebhookException(
+          'Error: no strategy found for: ' + enumValue
+        );
+      }
+    } catch (Exception e) {
+      Logger.error(e.getMessage());
+      return response.statusCode = 404;
+    }
+
     StripeWebhookQueueable stripeWebhookQueueable = new StripeWebhookQueueable(
       strategyObject,
       body
@@ -189,5 +200,8 @@ global without sharing class StripeEventsWebhook {
 
     // Compare
     return hashHex.equalsIgnoreCase(expectedSig);
+  }
+
+  public class StripeEventsWebhookException extends Exception {
   }
 }
