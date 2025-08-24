@@ -9,27 +9,27 @@
 
 ## Setup Instructions
 
-### 1. Prerequisites
+### 🏋️‍♀️1. Prerequisites
 - Salesforce org with API access enabled  
 - A valid **Stripe API Key** (test or live, depending on environment)  
 - Salesforce **Named Credential** configured for Stripe API
 
-### 2. Installation
+### 🛠️ 2. Installation
 1. Clone or pull this repository into your local Salesforce DX / VS Code project  
 2. Deploy metadata to your Salesforce org  
    ```sh
    sfdx force:source:deploy -p force-app
 
-### 3. Configuration
+### 🤓 3. Configuration
 
-### Usage
+### 🐎 Usage
 
-### Troubleshooting
+### 🥴 Troubleshooting
 
-### Architecture
+### 🍔 Architecture
 
-### Contributing
+### 💞 Contributing
 
-### Questions And/Or Feedback
+### 📨 Questions And/Or Feedback
 
 
