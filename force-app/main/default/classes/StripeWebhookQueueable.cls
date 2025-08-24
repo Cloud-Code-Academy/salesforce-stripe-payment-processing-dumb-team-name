@@ -2,6 +2,7 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
   IStripeWebhookStrategy strategy;
   String requestBody;
 
+
   public StripeWebhookQueueable(
     IStripeWebhookStrategy strategy,
     String requestBody
@@ -14,6 +15,7 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
   public void execute(QueueableContext qc) {
     String jobId = '' + qc.getJobId();
     Logger.info('Begin: executing queueable job: ' + jobId);
+
 
     try {
       // Attach finalizer with same parameters
@@ -33,6 +35,7 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
     // TODO: Review what Justin did in class on Tuesday, Aug 19, to chain the queueable until all records are processed, and do I need to worry about stack depth
   }
 
+
   // Finalizer implementation
 
   public void execute(FinalizerContext ctx) {
@@ -40,6 +43,7 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
     Logger.info(
       'Begin: executing finalizer attached to queueable job: ' + parentJobId
     );
+
 
     if (ctx.getResult() == ParentJobResult.SUCCESS) {
       System.debug(

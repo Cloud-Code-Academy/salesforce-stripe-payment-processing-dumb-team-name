@@ -3,6 +3,7 @@ public with sharing class StripeCustomerWebhookStrategy implements IStripeWebhoo
     Logger.info('Hello from Customer Strategy!');
     Logger.info('This is the request body: ' + requestBody);
 
+
     return 201;
   }
 }

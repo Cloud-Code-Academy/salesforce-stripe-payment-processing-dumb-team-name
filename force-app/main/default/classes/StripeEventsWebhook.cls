@@ -77,8 +77,13 @@ global without sharing class StripeEventsWebhook {
       // Process payload
       Logger.info('Webhook is valid: ' + body);
     } else {
+
       Logger.error('Invalid signature');
       return response.statusCode = 401;
+
+      
+    
+
     }
 
     StripeWebhookRequestOuterWrapper outerWrapper = (StripeWebhookRequestOuterWrapper) JSON.deserialize(
@@ -102,7 +107,13 @@ global without sharing class StripeEventsWebhook {
       return response.statusCode = 404;
     }
 
-    // Dynamically select the strategy
+
+            StripeWebhookQueueable stripeWebhookQueueable = new StripeWebhookQueueable(strategyObject, body);
+
+            System.enqueueJob(stripeWebhookQueueable);
+
+            response.statusCode = stripeWebhookQueueable?.responseCode;
+
 
     IStripeWebhookStrategy strategyObject = eventTypeStrategyMap.get(enumValue);
 
