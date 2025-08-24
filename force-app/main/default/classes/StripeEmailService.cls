@@ -8,3 +8,4 @@ public with sharing class StripeEmailService {
         Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
     }
 }
+
