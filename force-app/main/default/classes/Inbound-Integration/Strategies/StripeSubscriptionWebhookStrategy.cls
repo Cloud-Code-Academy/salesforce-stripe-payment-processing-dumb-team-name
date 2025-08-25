@@ -1,4 +1,4 @@
-public with sharing class StripeSubscriptionWebhookStrategy implements IStripeWebhookStrategy {
+public without sharing class StripeSubscriptionWebhookStrategy implements IStripeWebhookStrategy {
   public Integer handle(String requestBody) {
     Logger.info('Executing subscription strategy.');
 
@@ -21,12 +21,7 @@ public with sharing class StripeSubscriptionWebhookStrategy implements IStripeWe
   }
 
   public Integer subscriptionUpdate(StripeWebhookSubscriptionWrapper wrapper) {
-    Logger.info('Event Type: ' + wrapper.type);
-    Logger.info('Subscription ID: ' + wrapper.data.object_x.id);
-
-    Logger.info('Price ID: ' + wrapper.data.object_x.items.data[0].price.id);
-    Logger.info('Quantity: ' + wrapper.data.object_x.items.data[0].quantity);
-    Logger.saveLog();
+    String subId = wrapper.data.object_x.id;
 
     Stripe_Subscription__c sub = [
       SELECT
@@ -42,7 +37,7 @@ public with sharing class StripeSubscriptionWebhookStrategy implements IStripeWe
         Stripe_Subscription_ID__c,
         Sync_Status__c
       FROM Stripe_Subscription__c
-      WHERE Stripe_Subscription_ID__c = :wrapper.data.object_x.id
+      WHERE Stripe_Subscription_ID__c = :subId
       LIMIT 1
     ];
 
@@ -64,7 +59,7 @@ public with sharing class StripeSubscriptionWebhookStrategy implements IStripeWe
     sub.Current_Period_End__c = dateEnd;
     sub.Product_Plan_Name__c = wrapper.data.object_x.items.data[0].plan.product;
 
-    //todo: what to do with status?
+    //TODO: what to do with status?
     sub.Stripe_Price_ID__c = wrapper.data.object_x.items.data[0].price.id;
     sub.Stripe_Customer__c = wrapper.customer;
     sub.Sync_Status__c = 'Synced';
