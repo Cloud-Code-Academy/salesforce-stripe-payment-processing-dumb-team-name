@@ -1,37 +1,41 @@
 public with sharing class StripeWebhookInvoiceWrapper {
-  String id { get; set; }
-  String object_x { get; set; }
-  Long created { get; set; }
-  DataWrapper data { get; set; }
-  String type { get; set; }
+  public String id { get; set; }
+  public String object_x { get; set; }
+  public Long created { get; set; }
+  public DataWrapper data { get; set; }
+  public String type { get; set; }
 
   public class DataWrapper {
-    InvoiceWrapper object_x { get; set; }
+    public InvoiceWrapper object_x { get; set; }
   }
 
   public class InvoiceWrapper {
-    String id { get; set; }
-    String object_x { get; set; }
-    Integer amount_paid { get; set; }
-    String currency_x { get; set; }
-    String customer { get; set; }
-    String invoice_pdf { get; set; }
-    LinesWrapper lines { get; set; }
-    Integer period_end { get; set; }
-    Integer period_start { get; set; }
-    String status { get; set; }
+    public String id { get; set; }
+    public String object_x { get; set; }
+    public Integer amount_paid { get; set; }
+    public String currency_x { get; set; }
+    public String customer { get; set; }
+    public String invoice_pdf { get; set; }
+    public LinesWrapper lines { get; set; }
+    public Integer period_end { get; set; }
+    public Integer period_start { get; set; }
+    public String status { get; set; }
   }
 
   public class LinesWrapper {
-    List<LinesData> data { get; set; }
+    public List<LinesData> data { get; set; }
   }
 
   public class LinesData {
-    ParentWrapper parent { get; set; }
+    public ParentWrapper parent { get; set; }
   }
 
   public class ParentWrapper {
-    String subscription { get; set; }
+    public InvoiceItemDetails invoice_item_details { get; set; }
+  }
+
+  public class InvoiceItemDetails {
+    public String subscription { get; set; }
   }
 
   public static StripeWebhookInvoiceWrapper parse(String body) {
