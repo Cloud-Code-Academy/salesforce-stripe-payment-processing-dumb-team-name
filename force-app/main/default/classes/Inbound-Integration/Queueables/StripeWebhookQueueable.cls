@@ -43,8 +43,6 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
     strategy.handle(requestBody);
 
     Logger.info('Completed: execution of job: ' + jobId);
-
-    // TODO: Review what Justin did in class on Tuesday, Aug 19, to chain the queueable until all records are processed, and do I need to worry about stack depth
   }
 
   // Finalizer implementation

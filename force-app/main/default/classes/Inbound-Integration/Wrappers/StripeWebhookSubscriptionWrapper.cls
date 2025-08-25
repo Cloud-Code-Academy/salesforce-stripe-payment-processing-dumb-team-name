@@ -3,6 +3,8 @@ public class StripeWebhookSubscriptionWrapper {
   public String type { get; set; }
   public Long created { get; set; }
   public DataWrapper data { get; set; }
+  public String currency_x { get; set; }
+  public String customer { get; set; }
 
   public class DataWrapper {
     public SubscriptionWrapper object_x { get; set; }

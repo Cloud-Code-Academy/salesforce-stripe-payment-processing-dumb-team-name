@@ -11,8 +11,6 @@ global without sharing class StripeEventsWebhook {
     customer_updated,
     customer_subscription_updated,
     customer_subscription_deleted,
-    customer_subscription_paused,
-    customer_subscription_resumed,
     invoice_paid,
     invoice_payment_failed
   }
@@ -33,14 +31,6 @@ global without sharing class StripeEventsWebhook {
     );
     eventTypeStrategyMap.put(
       types.customer_subscription_deleted,
-      new StripeSubscriptionWebhookStrategy()
-    );
-    eventTypeStrategyMap.put(
-      types.customer_subscription_paused,
-      new StripeSubscriptionWebhookStrategy()
-    );
-    eventTypeStrategyMap.put(
-      types.customer_subscription_resumed,
       new StripeSubscriptionWebhookStrategy()
     );
     eventTypeStrategyMap.put(
