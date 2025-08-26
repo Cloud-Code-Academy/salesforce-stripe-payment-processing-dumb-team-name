@@ -79,7 +79,7 @@ private Map<Id, Stripe_Subscription__c> oldSubscriptionsMap;
             Logger.saveLog();
         }
     }
-    if(!subscriptionsToUpdate.isEmpty()) {
+    if(!subscriptionsToUpdate.isEmpty()){
         update subscriptionsToUpdate;
         }
     }
