@@ -1,8 +1,19 @@
+/**
+ * @description For processing inbound webhook events asynchronously
+ *
+ * @author Jonathan Lyles
+ * @date August 25, 2025
+ * @group Stripe Inbound Integration
+ */
+
 public with sharing class StripeWebhookQueueable implements Queueable, Finalizer {
   IStripeWebhookStrategy strategy;
   String requestBody;
   Integer attemptCount;
 
+  /**
+   * @description Constructor for queueable implementation
+   */
   public StripeWebhookQueueable(
     IStripeWebhookStrategy strategy,
     String requestBody
@@ -12,7 +23,9 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
     this.attemptCount = 1;
   }
 
-  // Constructor for retry attempts
+  /**
+   * @description Constructor for finalizer implementation
+   */
   public StripeWebhookQueueable(
     IStripeWebhookStrategy strategy,
     String requestBody,
@@ -25,12 +38,13 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
     }
   }
 
-  //Queueable implementation
+  /**
+   * @description Queueable implementation
+   */
   public void execute(QueueableContext qc) {
     String jobId = '' + qc.getJobId();
     Logger.info('Begin: executing queueable job: ' + jobId);
 
-    // Attach finalizer with same parameters
     System.attachFinalizer(
       new StripeWebhookQueueable(
         this.strategy,
@@ -39,14 +53,15 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
       )
     );
 
-    // If this throws, Salesforce will retry once automatically
+    // If this throws, it will retry 5 times (see Finalizer)
     strategy.handle(requestBody);
 
     Logger.info('Completed: execution of job: ' + jobId);
   }
 
-  // Finalizer implementation
-
+  /**
+   * @description Finalizer implementation
+   */
   public void execute(FinalizerContext ctx) {
     String parentJobId = '' + ctx.getAsyncApexJobId();
     Logger.info(

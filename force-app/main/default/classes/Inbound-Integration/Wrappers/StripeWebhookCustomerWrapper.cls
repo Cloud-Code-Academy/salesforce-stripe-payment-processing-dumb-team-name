@@ -1,3 +1,11 @@
+/**
+ * @description Wrapper classes for inbound customer events from Stripe
+ *
+ * @author Jonathan Lyles
+ * @date August 25, 2025
+ * @group Stripe Inbound Integration
+ */
+
 public with sharing class StripeWebhookCustomerWrapper {
   public String id { get; set; }
   public String object_x { get; set; }
@@ -17,6 +25,11 @@ public with sharing class StripeWebhookCustomerWrapper {
     public String phone { get; set; }
   }
 
+  /**
+   * @description Helper class for parsing the request body from customer events
+   *
+   * @return StripeWebhookCustomerWrapper
+   */
   public static StripeWebhookCustomerWrapper parse(String body) {
     StripeWebhookCustomerWrapper wrapper = (StripeWebhookCustomerWrapper) JSON.deserialize(
       body,

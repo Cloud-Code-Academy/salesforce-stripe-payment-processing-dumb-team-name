@@ -1,3 +1,12 @@
+/**
+ * @description Wrapper classes for inbound Stripe subscription events
+ *
+ * @author Jonathan Lyles
+ * @date August 25, 2025
+ * @group Stripe Inbound Integration
+ *
+ */
+
 public class StripeWebhookSubscriptionWrapper {
   public String id { get; set; }
   public String type { get; set; }
@@ -76,6 +85,11 @@ public class StripeWebhookSubscriptionWrapper {
     public String usage_type { get; set; }
   }
 
+  /**
+   * @description Helper class for parsing request bodies from subscription events
+   *
+   * @return StripeWebhookSubscriptionWrapper
+   */
   public static StripeWebhookSubscriptionWrapper parse(String body) {
     StripeWebhookSubscriptionWrapper wrapper = (StripeWebhookSubscriptionWrapper) JSON.deserialize(
       body,
