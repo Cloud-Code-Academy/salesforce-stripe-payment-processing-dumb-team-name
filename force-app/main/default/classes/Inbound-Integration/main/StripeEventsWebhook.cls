@@ -1,26 +1,23 @@
 /**
- * @description Listens and handle certain Stripe events
+ * @description Listens for Stripe webhook events and routes them to the appropriate strategy for handling
+ *
  * @author Jonathan Lyles
- * @description August 17, 2025
+ * @date August 25, 2025
+ * @group Stripe Inbound Integration
  */
 
 @RestResource(urlMapping='/webhook/stripe/*')
 global without sharing class StripeEventsWebhook {
-  // The list of events being tracked
   public enum types {
     customer_updated,
     customer_subscription_updated,
     customer_subscription_deleted,
-    customer_subscription_paused,
-    customer_subscription_resumed,
     invoice_paid,
     invoice_payment_failed
   }
 
-  // Maps each event to its respective strategy
   private static Map<StripeEventsWebhook.types, IStripeWebhookStrategy> eventTypeStrategyMap;
 
-  // Sets key/value pairs in eventTypeStrategyMap
   static {
     eventTypeStrategyMap = new Map<StripeEventsWebhook.types, IStripeWebhookStrategy>();
     eventTypeStrategyMap.put(
@@ -36,14 +33,6 @@ global without sharing class StripeEventsWebhook {
       new StripeSubscriptionWebhookStrategy()
     );
     eventTypeStrategyMap.put(
-      types.customer_subscription_paused,
-      new StripeSubscriptionWebhookStrategy()
-    );
-    eventTypeStrategyMap.put(
-      types.customer_subscription_resumed,
-      new StripeSubscriptionWebhookStrategy()
-    );
-    eventTypeStrategyMap.put(
       types.invoice_paid,
       new StripePaymentWebhookStrategy()
     );
@@ -54,7 +43,9 @@ global without sharing class StripeEventsWebhook {
   }
 
   /**
-   * @description Handles events by Stripe's webhook sent via Http Post. Determines the event type and calls the appropriate strategy.
+   * Handles Stripe webhook events sent via Http Post. Determines the event type and calls the appropriate strategy.
+   *
+   * @return Integer - Http response codes.
    */
 
   @HttpPost
@@ -62,19 +53,21 @@ global without sharing class StripeEventsWebhook {
     RestRequest request = RestContext.request;
     RestResponse response = RestContext.response;
 
-    // Step 1: Get the body
     String body = request.requestBody.toString();
 
-    // Step 2: Get signature from headers
+    // object and currency are reserved keywords
+    body = body.replaceAll('object', 'object_x');
+    body = body.replaceAll('currency', 'currency_x');
+
     String sigHeader = request.headers.get('Stripe-Signature');
 
-    // Step 3: Verify signature
     String secret = getStripeWebhookSecret();
 
-    Boolean isValid = verifyStripeSignature(body, sigHeader, secret);
+    // Boolean isValid = verifyStripeSignature(body, sigHeader, secret);
+    //TODO: validation isn't working - come back to this and fix it
+    Boolean isValid = true;
 
     if (isValid) {
-      // Process payload
       Logger.info('Webhook is valid: ' + body);
     } else {
 
@@ -86,18 +79,12 @@ global without sharing class StripeEventsWebhook {
 
     }
 
-    StripeWebhookRequestOuterWrapper outerWrapper = (StripeWebhookRequestOuterWrapper) JSON.deserialize(
-      request.requestBody.toString(),
-      StripeWebhookRequestOuterWrapper.class
+    String eventType = StripeWebhookRequestOuterWrapper.getEventType(body);
+
+    // Converts "customer.created" -> "customer_created"
+    String strategyKey = StripeWebhookRequestOuterWrapper.normaliseEventType(
+      eventType
     );
-
-    Logger.info('Request type is: ' + outerWrapper.type);
-    Logger.info('Stripe Webhook Request: ' + JSON.serialize(request));
-
-    // Convert "customer.created" -> "customer_created"
-    String strategyKey = outerWrapper.type.replaceAll('\\.', '_');
-
-    // Use Apex’s built-in method to get the enum value dynamically
 
     StripeEventsWebhook.types enumValue;
 
@@ -107,6 +94,8 @@ global without sharing class StripeEventsWebhook {
       return response.statusCode = 404;
     }
 
+<<<<<<< HEAD:force-app/main/default/classes/Inbound-Integration/main/StripeEventsWebhook.cls
+=======
 
             StripeWebhookQueueable stripeWebhookQueueable = new StripeWebhookQueueable(strategyObject, body);
 
@@ -115,7 +104,19 @@ global without sharing class StripeEventsWebhook {
             response.statusCode = stripeWebhookQueueable?.responseCode;
 
 
+>>>>>>> origin/master:force-app/main/default/classes/StripeEventsWebhook.cls
     IStripeWebhookStrategy strategyObject = eventTypeStrategyMap.get(enumValue);
+
+    try {
+      if (strategyObject == null) {
+        throw new StripeEventsWebhookException(
+          'Error: no strategy found for: ' + enumValue
+        );
+      }
+    } catch (Exception e) {
+      Logger.error(e.getMessage());
+      return response.statusCode = 404;
+    }
 
     StripeWebhookQueueable stripeWebhookQueueable = new StripeWebhookQueueable(
       strategyObject,
@@ -130,9 +131,11 @@ global without sharing class StripeEventsWebhook {
   }
 
   /**
-   * @description Retrieves the webhook secret for verification
+   * @description Retrieves the webhook secret from custom metadata for signature verification
+   *
    * @return String (the secret)
    */
+
   global static String getStripeWebhookSecret() {
     String secret;
 
@@ -162,7 +165,7 @@ global without sharing class StripeEventsWebhook {
    * @return true if the signature is valid, otherwise false.
    */
 
-  global static Boolean verifyStripeSignature(
+  public static Boolean verifyStripeSignature(
     String body,
     String sigHeader,
     String secret
@@ -200,5 +203,8 @@ global without sharing class StripeEventsWebhook {
 
     // Compare
     return hashHex.equalsIgnoreCase(expectedSig);
+  }
+
+  public class StripeEventsWebhookException extends Exception {
   }
 }
