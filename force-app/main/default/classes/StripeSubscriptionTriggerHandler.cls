@@ -15,7 +15,13 @@ public with sharing class StripeSubscriptionTriggerHandler extends TriggerHandle
 
     public override void afterUpdate() {
         System.debug('afterUpdate called, newSubscriptionMap: ' + newSubscriptionMap.keySet());
+            if (TriggerBypass.bypassStripeSubscription) {
+            return;
+        }
+        
+            
             StripeSubscriptionService.handleUpdatedSubscriptions(newSubscriptionMap, oldSubscriptionMap);
+
         
     }
 }
