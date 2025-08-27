@@ -10,6 +10,7 @@
 global without sharing class StripeEventsWebhook {
   public enum types {
     customer_updated,
+    customer_subscription_created,
     customer_subscription_updated,
     customer_subscription_deleted,
     invoice_paid,
@@ -23,6 +24,10 @@ global without sharing class StripeEventsWebhook {
     eventTypeStrategyMap.put(
       types.customer_updated,
       new StripeCustomerWebhookStrategy()
+    );
+    eventTypeStrategyMap.put(
+      types.customer_subscription_created,
+      new StripeSubscriptionWebhookStrategy()
     );
     eventTypeStrategyMap.put(
       types.customer_subscription_updated,
