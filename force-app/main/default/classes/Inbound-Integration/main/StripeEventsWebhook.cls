@@ -70,13 +70,8 @@ global without sharing class StripeEventsWebhook {
     if (isValid) {
       Logger.info('Webhook is valid: ' + body);
     } else {
-
       Logger.error('Invalid signature');
       return response.statusCode = 401;
-
-      
-    
-
     }
 
     String eventType = StripeWebhookRequestOuterWrapper.getEventType(body);
@@ -94,17 +89,6 @@ global without sharing class StripeEventsWebhook {
       return response.statusCode = 404;
     }
 
-<<<<<<< HEAD:force-app/main/default/classes/Inbound-Integration/main/StripeEventsWebhook.cls
-=======
-
-            StripeWebhookQueueable stripeWebhookQueueable = new StripeWebhookQueueable(strategyObject, body);
-
-            System.enqueueJob(stripeWebhookQueueable);
-
-            response.statusCode = stripeWebhookQueueable?.responseCode;
-
-
->>>>>>> origin/master:force-app/main/default/classes/StripeEventsWebhook.cls
     IStripeWebhookStrategy strategyObject = eventTypeStrategyMap.get(enumValue);
 
     try {
