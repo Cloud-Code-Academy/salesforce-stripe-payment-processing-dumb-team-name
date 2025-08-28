@@ -6,7 +6,8 @@
  * @group Stripe Inbound Integration
  */
 
-@RestResource(urlMapping='/webhook/stripe/*')
+@RestResource(urlMapping='/webhook/*')
+//@RestResource(urlMapping='/webhook/stripe/*')
 global without sharing class StripeEventsWebhook {
   public enum types {
     customer_updated,

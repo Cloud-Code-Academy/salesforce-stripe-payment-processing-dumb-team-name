@@ -21,8 +21,10 @@
  */
 @isTest
 public class StripeHttpMock implements HttpCalloutMock {
+
     private Integer statusCode;
     private String body;
+    private Integer counter = 0;
 
     // Constructor
     public StripeHttpMock(Integer statusCode, String body) {
@@ -31,19 +33,29 @@ public class StripeHttpMock implements HttpCalloutMock {
     }
 
     // Respond method called by test framework
-    public HTTPResponse respond(HTTPRequest req) {
-        HttpResponse res = new HttpResponse();
-        res.setBody(body);
-        res.setHeader('Content-Type', 'application/json'); // use JSON if your service expects it
-        res.setStatusCode(statusCode);
-        return res;
-    }
+    // public HTTPResponse respond(HTTPRequest req) {
+    //     HttpResponse res = new HttpResponse();
+    //     res.setBody(body);
+    //     res.setHeader('Content-Type', 'application/json'); // use JSON if your service expects it
+    //     res.setStatusCode(statusCode);
+    //     return res;
+    // }
+
+        public HTTPResponse respond(HTTPRequest req) {
+            counter++;
+            HttpResponse res = new HttpResponse();
+            res.setStatusCode(200);
+            res.setBody('{"id":"cus_test' + counter + '","email":"test' + counter + '@example.com","name":"Test User ' + counter + '"}');
+            res.setHeader('Content-Type', 'application/json');
+            return res;
+        }
 
     // Helper for a successful subscription creation response
 public static StripeHttpMock CustomerCreateSuccess() {
     String body = '{"id":"cus_123456789","object":"customer","email":"test@example.com","name":"Test Customer","phone":"1234567890","metadata":{},"default_source":null,"invoice_settings":{"custom_fields":null,"default_payment_method":null,"footer":null},"created":1749500297,"livemode":false,"description":null,"delinquent":false}';
     return new StripeHttpMock(200, body);
 }
+
 
 public static StripeHttpMock CustomerCreateFailure() {
     String body = '{"error":{"message":"The email address provided is invalid.","type":"invalid_request_error","param":"email"}}';
