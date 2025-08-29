@@ -5,7 +5,7 @@
  * @date August 25, 2025
  * @group Stripe Inbound Integration
  */
-
+//TODO: is this writing to logs? Do I need to create an instance of logger and/or save the log?
 public with sharing class StripeWebhookQueueable implements Queueable, Finalizer {
   IStripeWebhookStrategy strategy;
   String requestBody;
@@ -55,7 +55,6 @@ public with sharing class StripeWebhookQueueable implements Queueable, Finalizer
 
     // If this throws, it will retry 5 times (see Finalizer)
     strategy.handle(requestBody);
-
     Logger.info('Completed: execution of job: ' + jobId);
   }
 

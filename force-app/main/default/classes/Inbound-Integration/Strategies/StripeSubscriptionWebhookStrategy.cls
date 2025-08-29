@@ -13,7 +13,6 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    */
   public Integer handle(String requestBody) {
     Logger.info('Executing subscription strategy.');
-
     StripeWebhookSubscriptionWrapper wrapper = StripeWebhookSubscriptionWrapper.parse(
       requestBody
     );
@@ -21,6 +20,9 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
     Integer result;
 
     switch on wrapper.type {
+      when 'customer.subscription.created' {
+        result = subscriptionCreate(wrapper);
+      }
       when 'customer.subscription.updated' {
         result = subscriptionUpdate(wrapper);
       }
@@ -33,12 +35,24 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
   }
 
   /**
-   * @description Logic for subscription update events
+   * @description Logic for subscription created events
    *
    * @return Integer Http response code
    */
-  public Integer subscriptionUpdate(StripeWebhookSubscriptionWrapper wrapper) {
-    String subId = wrapper.data.object_x.id;
+  public Integer subscriptionCreate(StripeWebhookSubscriptionWrapper wrapper) {
+    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+
+    try {
+      if (SubscriptionRecordId == null) {
+        throw new StripeSubscriptionWebhookStrategyException(
+          'Subscription Id is null'
+        );
+      }
+    } catch (StripeSubscriptionWebhookStrategyException e) {
+      Logger.error(e.getMessage());
+      Logger.saveLog();
+      return 422;
+    }
 
     Stripe_Subscription__c sub = [
       SELECT
@@ -52,9 +66,86 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
         Stripe_Customer__c,
         Stripe_Price_ID__c,
         Stripe_Subscription_ID__c,
+        Stripe_Subscription_Item_ID__c,
         Sync_Status__c
       FROM Stripe_Subscription__c
-      WHERE Stripe_Subscription_ID__c = :subId
+      WHERE Stripe_Subscription_ID__c = :SubscriptionRecordId
+      LIMIT 1
+    ];
+
+    //Check this
+    sub.Stripe_Subscription_ID__c = wrapper.data.object_x.id;
+    sub.Sync_Status__c = 'Synced';
+
+    Integer response;
+
+    try {
+      update sub;
+      Logger.info(
+        'Subscription ' +
+          subscriptionRecordId +
+          ' successfully synced after creation.'
+      );
+      response = 204;
+    } catch (DmlException e) {
+      Logger.error(e.getMessage());
+      Logger.error(
+        'DML Exception. Subscription ' +
+          subscriptionRecordId +
+          ' was not successfully synced.'
+      );
+      response = 422;
+    } catch (Exception e) {
+      Logger.error(
+        'Unexpected exception. Subscription record ' +
+          subscriptionRecordId +
+          ' was not successfully synced. Error message: ' +
+          e.getMessage()
+      );
+      response = 500;
+    } finally {
+      Logger.saveLog();
+    }
+    return response;
+  }
+
+  /**
+   * @description Logic for subscription updated events
+   *
+   * @return Integer Http response code
+   */
+  public Integer subscriptionUpdate(StripeWebhookSubscriptionWrapper wrapper) {
+    // Note: This is referring to the record Id in Salesforce which is sent in the metadata of the request
+    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+
+    try {
+      if (SubscriptionRecordId == null) {
+        throw new StripeSubscriptionWebhookStrategyException(
+          'Subscription Id is null'
+        );
+      }
+    } catch (StripeSubscriptionWebhookStrategyException e) {
+      Logger.error(e.getMessage());
+      Logger.saveLog();
+      return 422;
+    }
+
+    Stripe_Subscription__c sub = [
+      SELECT
+        Id,
+        Amount__c,
+        Currency__c,
+        Current_Period_End__c,
+        Current_Period_Start__c,
+        Product_Plan_Name__c,
+        Status__c,
+        Stripe_Customer__c,
+        Stripe_Price_ID__c,
+        Stripe_Subscription_ID__c,
+        Stripe_Subscription_Item_ID__c,
+        Sync_Status__c
+      FROM Stripe_Subscription__c
+      WHERE Stripe_Subscription_ID__c = :SubscriptionRecordId
       LIMIT 1
     ];
 
@@ -62,19 +153,32 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       wrapper.data.object_x.items.data[0].plan.amount *
       wrapper.data.object_x.items.data[0].quantity;
 
-    sub.Amount__c = amount;
+    //Stripe sends 10000 for $100.00
+    sub.Amount__c = amount / 100;
     sub.Currency__c = wrapper.data.object_x.items.data[0].plan.currency_x;
 
+    sub.Stripe_Subscription_Item_ID__c = wrapper.data.object_x.items.data[0].id;
+
     //TODO: use DateUtils
-    Long timestampStart = wrapper.data.object_x.items.data[0]
-      .current_period_start;
-    Datetime dateStart = Datetime.newInstance(timestampStart * 1000L); // -> GMT
+    //TODO: delete this section when confirmed it is working
+    // Long timestampStart = wrapper.data.object_x.items
+    //   .current_period_start;
+    // Datetime dateStart = Datetime.newInstance(timestampStart * 1000L); // -> GMT
 
-    Long timestampEnd = wrapper.data.object_x.items.data[0].current_period_end;
-    Datetime dateEnd = Datetime.newInstance(timestampEnd * 1000L);
+    // Long timestampEnd = wrapper.data.object_x.items.data[0].current_period_end;
+    // Datetime dateEnd = Datetime.newInstance(timestampEnd * 1000L);
 
-    sub.Current_Period_Start__c = dateStart;
-    sub.Current_Period_End__c = dateEnd;
+    // sub.Current_Period_Start__c = dateStart;
+    // sub.Current_Period_End__c = dateEnd;
+
+    //Stripe sends time in Unix format
+    sub.Current_Period_Start__c = DateUtils.timestampToDatetimeConverter(
+      wrapper.data.object_x.items.data[0].current_period_start
+    );
+    sub.Current_Period_End__c = DateUtils.timestampToDatetimeConverter(
+      wrapper.data.object_x.items.data[0].current_period_end
+    );
+
     sub.Product_Plan_Name__c = wrapper.data.object_x.items.data[0].plan.product;
 
     // Business rule: Subscriptions cannot be re-assigned to another customer
@@ -103,6 +207,8 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    * @return Integer Http response code
    */
   public Integer subscriptionDelete(StripeWebhookSubscriptionWrapper wrapper) {
+    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+
     Stripe_Subscription__c sub = [
       SELECT
         Id,
@@ -113,13 +219,16 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
         Product_Plan_Name__c,
         Stripe_Price_ID__c,
         Stripe_Subscription_ID__c,
+        Stripe_Subscription_Item_ID__c,
         Sync_Status__c
       FROM Stripe_Subscription__c
-      WHERE Stripe_Subscription_ID__c = :wrapper.data.object_x.id
+      WHERE Stripe_Subscription_ID__c = :SubscriptionRecordId
       LIMIT 1
     ];
 
     sub.Status__c = 'Canceled';
+    sub.Sync_Status__c = 'Synced';
+
     try {
       update sub;
       Logger.info('Subscription successfully cancelled');
@@ -132,5 +241,8 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
     }
     Logger.saveLog();
     return 204;
+  }
+
+  public class StripeSubscriptionWebhookStrategyException extends Exception {
   }
 }
