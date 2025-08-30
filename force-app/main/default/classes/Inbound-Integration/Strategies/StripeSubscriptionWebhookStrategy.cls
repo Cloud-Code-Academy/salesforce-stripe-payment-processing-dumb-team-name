@@ -40,7 +40,9 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    * @return Integer Http response code
    */
   public Integer subscriptionCreate(StripeWebhookSubscriptionWrapper wrapper) {
-    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+    //Jason changed 8/29
+    //String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+    String SubscriptionRecordId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
 
     try {
       if (SubscriptionRecordId == null) {
@@ -69,7 +71,7 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
         Stripe_Subscription_Item_ID__c,
         Sync_Status__c
       FROM Stripe_Subscription__c
-      WHERE Stripe_Subscription_ID__c = :SubscriptionRecordId
+      WHERE Id = :SubscriptionRecordId
       LIMIT 1
     ];
 
@@ -116,7 +118,9 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    */
   public Integer subscriptionUpdate(StripeWebhookSubscriptionWrapper wrapper) {
     // Note: This is referring to the record Id in Salesforce which is sent in the metadata of the request
-    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+    //Jason changed 8/29
+    //String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Salesforce_Subscription_Id;
 
     try {
       if (SubscriptionRecordId == null) {
@@ -207,7 +211,8 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    * @return Integer Http response code
    */
   public Integer subscriptionDelete(StripeWebhookSubscriptionWrapper wrapper) {
-    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+    //String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
+    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Salesforce_Subscription_Id;
 
     Stripe_Subscription__c sub = [
       SELECT

@@ -53,6 +53,7 @@ private Map<Id, Stripe_Subscription__c> oldSubscriptionsMap;
             newSub.Stripe_Subscription_Item_ID__c,
             newSub.Stripe_Price_ID__c,
             isCancelled,
+            //added create prorations. This will push the remaining balance on Stripe to the end of the period.
             productChanged ? 'create_prorations' : null,
             metadata
         );

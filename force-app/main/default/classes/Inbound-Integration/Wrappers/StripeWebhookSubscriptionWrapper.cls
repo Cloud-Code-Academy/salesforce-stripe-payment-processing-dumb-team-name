@@ -17,13 +17,15 @@ public class StripeWebhookSubscriptionWrapper {
 
   public class DataWrapper {
     public SubscriptionWrapper object_x { get; set; }
-    public PreviousAttributesWrapper previous_attributes { get; set; }
+    //public PreviousAttributesWrapper previous_attributes { get; set; }
   }
 
   public class SubscriptionWrapper {
     public String id { get; set; }
     public String object_x { get; set; }
     public SubscriptionItemsWrapper items { get; set; }
+    // Jason added MetadataWrapper 8/29
+    public MetadataWrapper metadata {get; set;}
   }
 
   public class SubscriptionItemsWrapper {
@@ -91,7 +93,9 @@ public class StripeWebhookSubscriptionWrapper {
   }
 
   public class MetadataWrapper {
-    public String Subscription_Id { get; set; }
+    //Jason added 8/29
+    //public String Subscription_Id { get; set; }
+      public String Salesforce_Subscription_Id { get; set; }
   }
 
   /**

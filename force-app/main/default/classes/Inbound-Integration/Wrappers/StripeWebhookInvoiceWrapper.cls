@@ -35,7 +35,10 @@ public with sharing class StripeWebhookInvoiceWrapper {
 
   public class LinesData {
     public ParentWrapper parent { get; set; }
+        //Jason added 8/29
+    public Map<String,String> metadata {get; set;}
   }
+  
 
   public class ParentWrapper {
     //public InvoiceItemDetails invoice_item_details { get; set; }
