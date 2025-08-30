@@ -32,14 +32,6 @@ public class StripeHttpMock implements HttpCalloutMock {
         this.body = body;
     }
 
-    // Respond method called by test framework
-    // public HTTPResponse respond(HTTPRequest req) {
-    //     HttpResponse res = new HttpResponse();
-    //     res.setBody(body);
-    //     res.setHeader('Content-Type', 'application/json'); // use JSON if your service expects it
-    //     res.setStatusCode(statusCode);
-    //     return res;
-    // }
 
         public HTTPResponse respond(HTTPRequest req) {
             counter++;
@@ -50,7 +42,7 @@ public class StripeHttpMock implements HttpCalloutMock {
             return res;
         }
 
-    // Helper for a successful subscription creation response
+    
 public static StripeHttpMock CustomerCreateSuccess() {
     String body = '{"id":"cus_123456789","object":"customer","email":"test@example.com","name":"Test Customer","phone":"1234567890","metadata":{},"default_source":null,"invoice_settings":{"custom_fields":null,"default_payment_method":null,"footer":null},"created":1749500297,"livemode":false,"description":null,"delinquent":false}';
     return new StripeHttpMock(200, body);

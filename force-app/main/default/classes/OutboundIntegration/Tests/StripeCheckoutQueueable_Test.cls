@@ -43,14 +43,14 @@ private class StripeCheckoutQueueable_Test {
 
     @testSetup
     static void setupData() {
-        // Create a fake Stripe Customer record
+        
         Stripe_Customer__c cust = new Stripe_Customer__c(
             Stripe_Customer_ID__c = 'cus_123',
             Customer_Email__c = 'test@example.com'
         );
         insert cust;
 
-        // Create a Subscription record linked to customer
+        
         Stripe_Subscription__c sub = new Stripe_Subscription__c(            
             Stripe_Price_ID__c = 'price_123',
             Stripe_Customer__c = cust.Id
@@ -94,7 +94,7 @@ private class StripeCheckoutQueueable_Test {
         System.enqueueJob(new StripeCheckoutQueueable(subsMap));
         Test.stopTest();
 
-        // Subscription should not be updated with success values
+        
         Stripe_Subscription__c unchangedSub = [SELECT Sync_Status__c, Stripe_Checkout_Session_Id__c 
                                                FROM Stripe_Subscription__c WHERE Id = :sub.Id];
 
@@ -103,7 +103,7 @@ private class StripeCheckoutQueueable_Test {
 
     @isTest
     static void testMissingCustomerId() {
-        // Create subscription with missing customer id
+        
         Stripe_Customer__c cust2 = new Stripe_Customer__c(Customer_Email__c = 'jtowers@example.com');
         insert cust2;
 

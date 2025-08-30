@@ -14,11 +14,11 @@
 
 - A valid Stripe API Key (test or live, depending on environment)
 
-[Stripe API References](https://docs.stripe.com/api)
+>[Stripe API References](https://docs.stripe.com/api)
 
-[Stripe API Keys](https://docs.stripe.com/keys)
+>[Stripe API Keys](https://docs.stripe.com/keys)
 
-[Stripe Dashboard](https://dashboard.stripe.com/test/dashboard)
+>[Stripe Dashboard](https://dashboard.stripe.com/test/dashboard)
 
 
 ### 2. 🛠️ Installation
@@ -61,6 +61,6 @@
 
    ## 📨 Questions And/Or Feedback
 
-   [Email Me](mailto:jasonmtowers@gmail.com) or send me a message on [LinkedIn](www.linkedin.com/in/jasonmtowers)
+   [Email Jason Towers](mailto:jasonmtowers@gmail.com) or send Jason a message on [LinkedIn](www.linkedin.com/in/jasonmtowers)
 
 
