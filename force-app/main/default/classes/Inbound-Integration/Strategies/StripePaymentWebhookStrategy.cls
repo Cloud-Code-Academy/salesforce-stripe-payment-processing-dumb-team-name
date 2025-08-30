@@ -25,9 +25,9 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
       when 'invoice.paid' {
         result = invoicePaid(wrapper);
       }
-      when 'customer.subscription.deleted' {
-        result = invoicePaymentFailed(wrapper);
-      }
+      // when 'customer.subscription.deleted' {
+      //   result = invoicePaymentFailed(wrapper);
+      // }
     }
 
     return result;
@@ -84,9 +84,9 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
    */
 
   //TODO: still needs to be done
-  public Integer invoicePaymentFailed(StripeWebhookInvoiceWrapper wrapper) {
-    //TODO: Do I need a separate event or use invoicePaid? Does a failed payment contain a request that has all the info needed to use that method?
-  }
+  // public Integer invoicePaymentFailed(StripeWebhookInvoiceWrapper wrapper) {
+  //   //TODO: Do I need a separate event or use invoicePaid? Does a failed payment contain a request that has all the info needed to use that method?
+  // }
 
   /**
    * @description Helper method retrieves Stripe Subscription record
@@ -101,7 +101,9 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
     Stripe_Subscription__c sub = [
       SELECT Id, Stripe_Customer__c, Stripe_Subscription_ID__c
       FROM Stripe_Subscription__c
-      WHERE Stripe_Subscription_ID__c = :subId
+      WHERE Id = :subId
+      //Jason changed 8/29/25
+      //WHERE Stripe_Subscription_ID__c = :subId
       LIMIT 1
     ];
 
@@ -115,9 +117,10 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
    * @return String Stripe subscription Id
    */
   public String getSubscriptionId(StripeWebhookInvoiceWrapper wrapper) {
-    String subId = wrapper.data.object_x.lines.data[0]
-      .parent.subscription_item_details.subscription;
-
+    // String subId = wrapper.data.object_x.lines.data[0]
+    //   .parent.subscription_item_details.subscription;
+    //Jason added 8/29/25
+    String subId = wrapper.data.object_x.lines.data[0].metadata.get('Salesforce_Subscription_Id');
     return subId;
   }
 
