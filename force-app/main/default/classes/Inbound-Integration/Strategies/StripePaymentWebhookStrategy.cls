@@ -40,7 +40,7 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
    */
   public Integer invoicePaid(StripeWebhookInvoiceWrapper wrapper) {
     Integer result;
-
+    //TODO: add validation that wrapper has all the required data to proceed
     Stripe_Subscription__c sub = getSubscription(wrapper);
 
     Payment_Transaction__c payment = new Payment_Transaction__c();
@@ -49,9 +49,11 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
     payment.Transaction_Date__c = DateUtils.timestampToDatetimeConverter(
       wrapper.created
     );
-    //todo: Payment intent id is not delivered with invoice.paid event
-    //todo: status on event is 'paid' -- add a guard clause
-    //todo: check Stripe definitions and values for "collection_method". Does "charge_automatically" mean payment is by card?
+
+    // Payment_Method_Type__c field hidden: invoice.paid request body does not specify the payment method type
+
+    // Busines Decision: Stripe Payment Intent ID is populated with the invoice ID
+    payment.Stripe_Payment_Intent_ID__c = wrapper.data.object_x.id;
     payment.Status__c = 'Succeeded';
     payment.Stripe_Customer__c = sub.Stripe_Customer__c;
     payment.Stripe_Subscription__c = sub.Id;
@@ -63,10 +65,12 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
       );
       result = 201;
     } catch (DmlException e) {
-      Logger.error(e.getMessage());
+      System.debug('DML Exception');
+
       result = 422;
     } catch (Exception e) {
       Logger.error(e.getMessage());
+
       result = 500;
     }
     Logger.saveLog();
@@ -81,7 +85,7 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
 
   //TODO: still needs to be done
   public Integer invoicePaymentFailed(StripeWebhookInvoiceWrapper wrapper) {
-    return null;
+    //TODO: Do I need a separate event or use invoicePaid? Does a failed payment contain a request that has all the info needed to use that method?
   }
 
   /**
@@ -104,8 +108,9 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
     return sub;
   }
 
+  //TODO: Do I still need this?
   /**
-   * @description Helpler method. Get the subscription id
+   * @description Helpler method. Gets Stripe subscription id
    *
    * @return String Stripe subscription Id
    */
@@ -115,4 +120,10 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
 
     return subId;
   }
+
+  /**
+   * @description Helper method. Gets the Salesforce Stripe_Subscription__c record
+   *
+   * @return Stripe_Subscription__c
+   */
 }

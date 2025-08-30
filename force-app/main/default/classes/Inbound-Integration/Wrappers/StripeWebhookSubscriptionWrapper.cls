@@ -17,6 +17,7 @@ public class StripeWebhookSubscriptionWrapper {
 
   public class DataWrapper {
     public SubscriptionWrapper object_x { get; set; }
+    public PreviousAttributesWrapper previous_attributes { get; set; }
   }
 
   public class SubscriptionWrapper {
@@ -26,7 +27,7 @@ public class StripeWebhookSubscriptionWrapper {
   }
 
   public class SubscriptionItemsWrapper {
-    public String object_x { get; set; } //list
+    public String object_x { get; set; }
     public List<SubscriptionItemWrapper> data { get; set; }
   }
 
@@ -83,6 +84,14 @@ public class StripeWebhookSubscriptionWrapper {
     public Object meter { get; set; }
     public Object trial_period_days { get; set; }
     public String usage_type { get; set; }
+  }
+
+  public class PreviousAttributesWrapper {
+    public MetadataWrapper metadata { get; set; }
+  }
+
+  public class MetadataWrapper {
+    public String Subscription_Id { get; set; }
   }
 
   /**

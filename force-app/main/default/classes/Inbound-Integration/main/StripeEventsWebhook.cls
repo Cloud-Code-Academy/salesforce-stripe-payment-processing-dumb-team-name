@@ -2,7 +2,7 @@
  * @description Listens for Stripe webhook events and routes them to the appropriate strategy for handling
  *
  * @author Jonathan Lyles
- * @date August 25, 2025
+ * @date August 27, 2025
  * @group Stripe Inbound Integration
  */
 
@@ -11,6 +11,7 @@
 global without sharing class StripeEventsWebhook {
   public enum types {
     customer_updated,
+    customer_subscription_created,
     customer_subscription_updated,
     customer_subscription_deleted,
     invoice_paid,
@@ -24,6 +25,10 @@ global without sharing class StripeEventsWebhook {
     eventTypeStrategyMap.put(
       types.customer_updated,
       new StripeCustomerWebhookStrategy()
+    );
+    eventTypeStrategyMap.put(
+      types.customer_subscription_created,
+      new StripeSubscriptionWebhookStrategy()
     );
     eventTypeStrategyMap.put(
       types.customer_subscription_updated,
@@ -64,14 +69,18 @@ global without sharing class StripeEventsWebhook {
 
     String secret = getStripeWebhookSecret();
 
-    // Boolean isValid = verifyStripeSignature(body, sigHeader, secret);
-    //TODO: validation isn't working - come back to this and fix it
-    Boolean isValid = true;
+    // Send the raw request body as String, not the request body where the reserved keywords were changed.
+    Boolean isValid = verifyStripeSignature(
+      request.requestBody.toString(),
+      sigHeader,
+      secret
+    );
 
     if (isValid) {
       Logger.info('Webhook is valid: ' + body);
     } else {
       Logger.error('Invalid signature');
+      Logger.saveLog();
       return response.statusCode = 401;
     }
 
@@ -143,15 +152,14 @@ global without sharing class StripeEventsWebhook {
   /**
    * @description Verifies the Stripe webhook signature using HMAC-SHA256.
    *
-   * @param body      The raw request payload received from Stripe.
-   * @param sigHeader The `Stripe-Signature` header from the incoming request.
-   *                  Expected format: t=<timestamp>,v1=<signature>[,...]
-   * @param secret    The Stripe webhook signing secret used to compute the hash.
-   * @return true if the signature is valid, otherwise false.
+   * @param Blob requestBody  The raw request payload received from Stripe.
+   * @param String sigHeader  The `Stripe-Signature` header from the incoming request. Expected format: t=<timestamp>,v1=<signature>[,...]
+   * @param String secret     The Stripe webhook signing secret used to compute the hash.
+   * @return Boolean          True if the signature is valid, otherwise false.
    */
 
   public static Boolean verifyStripeSignature(
-    String body,
+    String requestBodyAsString,
     String sigHeader,
     String secret
   ) {
@@ -178,7 +186,7 @@ global without sharing class StripeEventsWebhook {
     String expectedSig = sigMap.get('v1');
 
     // Build signed payload string
-    String signedPayload = timestamp + '.' + body;
+    String signedPayload = timestamp + '.' + requestBodyAsString;
 
     // Compute HMAC-SHA256
     Blob key = Blob.valueOf(secret);
