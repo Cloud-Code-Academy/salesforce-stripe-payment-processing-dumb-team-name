@@ -46,6 +46,7 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
 
     try {
       if (SubscriptionId == null) {
+      if (SubscriptionId == null) {
         throw new StripeSubscriptionWebhookStrategyException(
           'Subscription Id is null'
         );
@@ -56,7 +57,32 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       return 422;
     }
     Stripe_Subscription__c sub = new Stripe_Subscription__c();
+    Stripe_Subscription__c sub = new Stripe_Subscription__c();
 
+    try {
+      sub = [
+        SELECT
+          Id,
+          Amount__c,
+          Currency__c,
+          Current_Period_End__c,
+          Current_Period_Start__c,
+          Product_Plan_Name__c,
+          Status__c,
+          Stripe_Customer__c,
+          Stripe_Price_ID__c,
+          Stripe_Subscription_ID__c,
+          Stripe_Subscription_Item_ID__c,
+          Sync_Status__c
+        FROM Stripe_Subscription__c
+        WHERE Id = :SubscriptionId
+        LIMIT 1
+      ];
+    } catch (QueryException e) {
+      Logger.error('Query Exception  : ' + e.getMessage());
+      Logger.saveLog();
+      return 422;
+    }
     try {
       sub = [
         SELECT
@@ -85,6 +111,7 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
     //Check this
     sub.Stripe_Subscription_ID__c = wrapper.data.object_x.id;
     sub.Stripe_Subscription_Item_ID__c = wrapper.data.object_x.items.data[0].id;
+    sub.Stripe_Subscription_Item_ID__c = wrapper.data.object_x.items.data[0].id;
     sub.Sync_Status__c = 'Synced';
 
     Integer response;
@@ -94,6 +121,7 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       Logger.info(
         'Subscription ' +
           subscriptionId +
+          subscriptionId +
           ' successfully synced after creation.'
       );
       response = 204;
@@ -102,6 +130,7 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       Logger.error(
         'DML Exception. Subscription ' +
           subscriptionId +
+          subscriptionId +
           ' was not successfully synced.'
       );
       response = 422;
@@ -109,9 +138,11 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       Logger.error(
         'Unexpected exception. Subscription record ' +
           subscriptionId +
+          subscriptionId +
           ' was not successfully synced. Error message: ' +
           e.getMessage()
       );
+
 
       response = 500;
     } finally {
@@ -127,11 +158,10 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    */
   public Integer subscriptionUpdate(StripeWebhookSubscriptionWrapper wrapper) {
     // Note: This is referring to the record Id in Salesforce which is sent in the metadata of the request
-    //Jason changed 8/29
-    //String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
-    String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Salesforce_Subscription_Id;
+    String SubscriptionId = wrapper.data.object_x.metadata.Subscription_Id;
 
     try {
+      if (SubscriptionId == null) {
       if (SubscriptionId == null) {
         throw new StripeSubscriptionWebhookStrategyException(
           'Subscription Id is null'
@@ -139,6 +169,31 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       }
     } catch (StripeSubscriptionWebhookStrategyException e) {
       Logger.error(e.getMessage());
+      Logger.saveLog();
+      return 422;
+    }
+    Stripe_Subscription__c sub = new Stripe_Subscription__c();
+    try {
+      sub = [
+        SELECT
+          Id,
+          Amount__c,
+          Currency__c,
+          Current_Period_End__c,
+          Current_Period_Start__c,
+          Product_Plan_Name__c,
+          Status__c,
+          Stripe_Customer__c,
+          Stripe_Price_ID__c,
+          Stripe_Subscription_ID__c,
+          Stripe_Subscription_Item_ID__c,
+          Sync_Status__c
+        FROM Stripe_Subscription__c
+        WHERE Id = :subscriptionId
+        LIMIT 1
+      ];
+    } catch (QueryException e) {
+      Logger.error('Query Exception: ' + e.getMessage());
       Logger.saveLog();
       return 422;
     }
@@ -217,7 +272,32 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
     String SubscriptionRecordId = wrapper.data.object_x.metadata.Subscription_Id;
 
     Stripe_Subscription__c sub = new Stripe_Subscription__c();
+    String SubscriptionRecordId = wrapper.data.object_x.metadata.Subscription_Id;
 
+    Stripe_Subscription__c sub = new Stripe_Subscription__c();
+
+    try {
+      sub = [
+        SELECT
+          Id,
+          Amount__c,
+          Currency__c,
+          Current_Period_End__c,
+          Current_Period_Start__c,
+          Product_Plan_Name__c,
+          Stripe_Price_ID__c,
+          Stripe_Subscription_ID__c,
+          Stripe_Subscription_Item_ID__c,
+          Sync_Status__c
+        FROM Stripe_Subscription__c
+        WHERE Id = :SubscriptionRecordId
+        LIMIT 1
+      ];
+    } catch (QueryException e) {
+      Logger.error('QueryException: ' + e.getMessage());
+      Logger.saveLog();
+      return 422;
+    }
     try {
       sub = [
         SELECT
