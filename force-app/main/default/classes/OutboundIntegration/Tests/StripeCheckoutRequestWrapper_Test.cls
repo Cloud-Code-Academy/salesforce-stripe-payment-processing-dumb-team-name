@@ -46,7 +46,7 @@ private class StripeCheckoutRequestWrapper_Test {
 
         String encoded = wrapper.toFormEncoded();
 
-        // Assert - ensure critical fields are in the encoded output
+        
         System.assert(encoded.contains('customer=cus_123'), 'Customer param missing');
         System.assert(encoded.contains('mode=subscription'), 'Mode param missing');
         System.assert(encoded.contains('success_url=https%3A%2F%2Fsuccess.com'), 'Success URL missing');
@@ -83,7 +83,7 @@ private class StripeCheckoutRequestWrapper_Test {
                 new StripeCheckoutRequestWrapper.LineItem('price_789', 1)
             };
 
-        // Pass null metadata + null subscription metadata
+        
         StripeCheckoutRequestWrapper wrapper = new StripeCheckoutRequestWrapper(
             'cus_789',
             'payment',

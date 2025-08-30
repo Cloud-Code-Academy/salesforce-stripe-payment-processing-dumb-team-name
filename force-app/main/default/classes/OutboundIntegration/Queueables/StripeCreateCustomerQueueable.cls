@@ -1,8 +1,8 @@
-public with sharing class ContactStripeSyncQueueable implements Queueable, Database.AllowsCallouts{
+public with sharing class StripeCreateCustomerQueueable implements Queueable, Database.AllowsCallouts{
 
     private Map<Id, Contact> contactsToSyncMap;
 
-    public ContactStripeSyncQueueable(Map<Id, Contact> contactsToSyncMap) {
+    public StripeCreateCustomerQueueable(Map<Id, Contact> contactsToSyncMap) {
 
         this.contactsToSyncMap = contactsToSyncMap;
     
@@ -52,17 +52,17 @@ public with sharing class ContactStripeSyncQueueable implements Queueable, Datab
                         stripeCustomersToInsert.add(newStripeCust);
                         
                 } else {
-                        //            Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
-                        //.setHttpResponseDetails(res)
-                        //.setExceptionDetails(new CalloutException('Status: ' + res.getStatus() + ' Body: ' + res.getBody()));
+                                   Logger.error('Stripe API returned non-success status: ' + res.getStatus(), contactToSync)
+                        .setHttpResponseDetails(res)
+                        .setExceptionDetails(new CalloutException('Status: ' + res.getStatus() + ' Body: ' + res.getBody()));
                 }
 
             } catch (Exception e) {
-               // Logger.error('Exception during Stripe callout', contactToSync)
-               //  .setExceptionDetails(e);           
+                Logger.error('Exception during Stripe callout', contactToSync)
+                .setExceptionDetails(e);           
             }
         
-        // End of for loop
+        
         }
 
         if(!contactsToUpdate.isEmpty()) {

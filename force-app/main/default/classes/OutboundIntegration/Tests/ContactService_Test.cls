@@ -1,7 +1,7 @@
 @IsTest
 private class ContactService_Test {
 
-    // Simple HttpCalloutMock to safely handle any unexpected callouts
+    
     private class OkHttpMock implements HttpCalloutMock {
         private integer counter = 0;
 
@@ -13,9 +13,9 @@ private class ContactService_Test {
             res.setHeader('Content-Type', 'application/json');
             return res;
         }
-    } // <-- CLOSE THE CLASS OkHttpMock HERE
+    } 
 
-    // Utility to create a Contact and return it
+    
     private static Contact makeContact(String firstName, String lastName, String email) {
         Contact c = new Contact(
             FirstName = firstName,

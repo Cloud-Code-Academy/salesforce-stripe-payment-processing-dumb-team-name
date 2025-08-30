@@ -1,5 +1,5 @@
 @IsTest
-private class ContactStripeSyncQueueable_Test {
+private class StripeCreateCustomerQueueable_Test {
     /**
      * Testing library/framework in use:
      * - Native Salesforce Apex testing framework with @IsTest annotations,
