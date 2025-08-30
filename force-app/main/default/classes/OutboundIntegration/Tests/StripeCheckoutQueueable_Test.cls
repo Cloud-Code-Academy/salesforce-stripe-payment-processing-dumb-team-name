@@ -12,7 +12,7 @@
  * coverage, and prevent regressions. All Apex classes are
  * required to have at least 75% code coverage in order to be deployed
  * to a production org. In addition, all triggers must have some code coverage.
- * 
+ *
  * The @isTest class annotation indicates this class only contains test
  * methods. Classes defined with the @isTest annotation do not count against
  * the org size limit for all Apex scripts.
@@ -21,109 +21,166 @@
  */
 @isTest
 private class StripeCheckoutQueueable_Test {
+  private class StripeCheckoutMock implements HttpCalloutMock {
+    private Integer statusCode;
+    private String body;
 
-    
-    private class StripeCheckoutMock implements HttpCalloutMock {
-        private Integer statusCode;
-        private String body;
-
-        StripeCheckoutMock(Integer statusCode, String body) {
-            this.statusCode = statusCode;
-            this.body = body;
-        }
-        
-        public HTTPResponse respond(HTTPRequest request) {
-            HttpResponse res = new HttpResponse();
-            res.setBody(body);
-            res.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-            res.setStatusCode(statusCode);
-            return res;
-        }       
+    StripeCheckoutMock(Integer statusCode, String body) {
+      this.statusCode = statusCode;
+      this.body = body;
     }
 
-    @testSetup
-    static void setupData() {
-        
-        Stripe_Customer__c cust = new Stripe_Customer__c(
-            Stripe_Customer_ID__c = 'cus_123',
-            Customer_Email__c = 'test@example.com'
-        );
-        insert cust;
-
-        
-        Stripe_Subscription__c sub = new Stripe_Subscription__c(            
-            Stripe_Price_ID__c = 'price_123',
-            Stripe_Customer__c = cust.Id
-        );
-        insert sub;
+    public HTTPResponse respond(HTTPRequest request) {
+      HttpResponse res = new HttpResponse();
+      res.setBody(body);
+      res.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+      res.setStatusCode(statusCode);
+      return res;
     }
+  }
 
-    @isTest
-    static void testSuccessfulCheckout() {
-        // Arrange
-        Stripe_Subscription__c sub = [SELECT Id FROM Stripe_Subscription__c LIMIT 1];
-        Map<Id, Stripe_Subscription__c> subsMap = new Map<Id, Stripe_Subscription__c>{ sub.Id => sub };
+  @testSetup
+  static void setupData() {
+    Stripe_Customer__c cust = new Stripe_Customer__c(
+      Stripe_Customer_ID__c = 'cus_123',
+      Customer_Email__c = 'test@example.com'
+    );
+    insert cust;
 
-        // Fake Stripe response
-        String fakeResponse = '{"id":"cs_test_123","object":"checkout.session","url":"https://checkout.stripe.com/test","subscription":"sub_456"}';
-        Test.setMock(HttpCalloutMock.class, new StripeCheckoutMock(200, fakeResponse));
+    Stripe_Subscription__c sub = new Stripe_Subscription__c(
+      Stripe_Price_ID__c = 'price_123',
+      Stripe_Customer__c = cust.Id
+    );
+    insert sub;
+  }
 
-        Test.startTest();
-        System.enqueueJob(new StripeCheckoutQueueable(subsMap));
-        Test.stopTest();
+  @isTest
+  static void testSuccessfulCheckout() {
+    // Arrange
+    Stripe_Subscription__c sub = [
+      SELECT Id
+      FROM Stripe_Subscription__c
+      LIMIT 1
+    ];
+    Map<Id, Stripe_Subscription__c> subsMap = new Map<Id, Stripe_Subscription__c>{
+      sub.Id => sub
+    };
 
-        // Assert that subscription was updated
-        Stripe_Subscription__c updatedSub = [SELECT Stripe_Subscription_ID__c, Stripe_Checkout_Session_Id__c, Checkout_URL__c, Sync_Status__c 
-                                             FROM Stripe_Subscription__c WHERE Id = :sub.Id];
+    // Fake Stripe response
+    String fakeResponse = '{"id":"cs_test_123","object":"checkout.session","url":"https://checkout.stripe.com/test","subscription":"sub_456"}';
+    Test.setMock(
+      HttpCalloutMock.class,
+      new StripeCheckoutMock(200, fakeResponse)
+    );
 
-        System.assertEquals('sub_456', updatedSub.Stripe_Subscription_ID__c, 'Should set subscription id');
-        System.assertEquals('cs_test_123', updatedSub.Stripe_Checkout_Session_Id__c, 'Should set session id');
-        System.assertEquals('https://checkout.stripe.com/test', updatedSub.Checkout_URL__c, 'Should set URL');
-        System.assertEquals('Checkout Created', updatedSub.Sync_Status__c, 'Should update sync status');
-    }
+    Test.startTest();
+    System.enqueueJob(new StripeCheckoutQueueable(subsMap));
+    Test.stopTest();
 
-    @isTest
-    static void testFailedCheckout() {
-        Stripe_Subscription__c sub = [SELECT Id FROM Stripe_Subscription__c LIMIT 1];
-        Map<Id, Stripe_Subscription__c> subsMap = new Map<Id, Stripe_Subscription__c>{ sub.Id => sub };
+    // Assert that subscription was updated
+    Stripe_Subscription__c updatedSub = [
+      SELECT
+        Stripe_Subscription_ID__c,
+        Stripe_Checkout_Session_Id__c,
+        Checkout_URL__c,
+        Sync_Status__c
+      FROM Stripe_Subscription__c
+      WHERE Id = :sub.Id
+    ];
 
-        // Mock 400 error
-        Test.setMock(HttpCalloutMock.class, new StripeCheckoutMock(400, '{"error":"Bad Request"}'));
+    System.assertEquals(
+      'sub_456',
+      updatedSub.Stripe_Subscription_ID__c,
+      'Should set subscription id'
+    );
+    System.assertEquals(
+      'cs_test_123',
+      updatedSub.Stripe_Checkout_Session_Id__c,
+      'Should set session id'
+    );
+    System.assertEquals(
+      'https://checkout.stripe.com/test',
+      updatedSub.Checkout_URL__c,
+      'Should set URL'
+    );
+    System.assertEquals(
+      'Checkout Created',
+      updatedSub.Sync_Status__c,
+      'Should update sync status'
+    );
+  }
 
-        Test.startTest();
-        System.enqueueJob(new StripeCheckoutQueueable(subsMap));
-        Test.stopTest();
+  @isTest
+  static void testFailedCheckout() {
+    Stripe_Subscription__c sub = [
+      SELECT Id
+      FROM Stripe_Subscription__c
+      LIMIT 1
+    ];
+    Map<Id, Stripe_Subscription__c> subsMap = new Map<Id, Stripe_Subscription__c>{
+      sub.Id => sub
+    };
 
-        
-        Stripe_Subscription__c unchangedSub = [SELECT Sync_Status__c, Stripe_Checkout_Session_Id__c 
-                                               FROM Stripe_Subscription__c WHERE Id = :sub.Id];
+    // Mock 400 error
+    Test.setMock(
+      HttpCalloutMock.class,
+      new StripeCheckoutMock(400, '{"error":"Bad Request"}')
+    );
 
-        System.assertEquals(null, unchangedSub.Stripe_Checkout_Session_Id__c, 'Should not populate session id on failure');
-    }
+    Test.startTest();
+    System.enqueueJob(new StripeCheckoutQueueable(subsMap));
+    Test.stopTest();
 
-    @isTest
-    static void testMissingCustomerId() {
-        
-        Stripe_Customer__c cust2 = new Stripe_Customer__c(Customer_Email__c = 'jtowers@example.com');
-        insert cust2;
+    Stripe_Subscription__c unchangedSub = [
+      SELECT Sync_Status__c, Stripe_Checkout_Session_Id__c
+      FROM Stripe_Subscription__c
+      WHERE Id = :sub.Id
+    ];
 
-        Stripe_Subscription__c sub = new Stripe_Subscription__c(            
-            Stripe_Price_ID__c = 'price_missing',
-            Stripe_Customer__c = cust2.Id
-        );
-        insert sub;
+    System.assertEquals(
+      null,
+      unchangedSub.Stripe_Checkout_Session_Id__c,
+      'Should not populate session id on failure'
+    );
+  }
 
-        Map<Id, Stripe_Subscription__c> subsMap = new Map<Id, Stripe_Subscription__c>{ sub.Id => sub };
+  @isTest
+  static void testMissingCustomerId() {
+    Stripe_Customer__c cust2 = new Stripe_Customer__c(
+      Customer_Email__c = 'jtowers@example.com'
+    );
+    insert cust2;
 
-        // Mock response (shouldn’t be called, since customer id is blank)
-        Test.setMock(HttpCalloutMock.class, new StripeCheckoutMock(200, '{"id":"should_not_hit"}'));
+    Stripe_Subscription__c sub = new Stripe_Subscription__c(
+      Stripe_Price_ID__c = 'price_missing',
+      Stripe_Customer__c = cust2.Id
+    );
+    insert sub;
 
-        Test.startTest();
-        System.enqueueJob(new StripeCheckoutQueueable(subsMap));
-        Test.stopTest();
+    Map<Id, Stripe_Subscription__c> subsMap = new Map<Id, Stripe_Subscription__c>{
+      sub.Id => sub
+    };
 
-        // Assert no updates happened
-        Stripe_Subscription__c unchangedSub = [SELECT Stripe_Checkout_Session_Id__c FROM Stripe_Subscription__c WHERE Id = :sub.Id];
-        System.assertEquals(null, unchangedSub.Stripe_Checkout_Session_Id__c, 'Should not update when customer ID is missing');
-    }
+    // Mock response (shouldn’t be called, since customer id is blank)
+    Test.setMock(
+      HttpCalloutMock.class,
+      new StripeCheckoutMock(200, '{"id":"should_not_hit"}')
+    );
+
+    Test.startTest();
+    System.enqueueJob(new StripeCheckoutQueueable(subsMap));
+    Test.stopTest();
+
+    // Assert no updates happened
+    Stripe_Subscription__c unchangedSub = [
+      SELECT Stripe_Checkout_Session_Id__c
+      FROM Stripe_Subscription__c
+      WHERE Id = :sub.Id
+    ];
+    System.assertEquals(
+      null,
+      unchangedSub.Stripe_Checkout_Session_Id__c,
+      'Should not update when customer ID is missing'
+    );
+  }
 }

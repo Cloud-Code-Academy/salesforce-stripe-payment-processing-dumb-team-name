@@ -12,7 +12,7 @@
  * coverage, and prevent regressions. All Apex classes are
  * required to have at least 75% code coverage in order to be deployed
  * to a production org. In addition, all triggers must have some code coverage.
- * 
+ *
  * The @isTest class annotation indicates this class only contains test
  * methods. Classes defined with the @isTest annotation do not count against
  * the org size limit for all Apex scripts.
@@ -21,13 +21,15 @@
  */
 @isTest
 private class StripeCheckoutResponseWrapper_Test {
-
-@IsTest
-static void testResponseWrapperDeserialization() {
+  @IsTest
+  static void testResponseWrapperDeserialization() {
     String jsonResponse = '{"id":"cs_123","objectType":"checkout.session","mode":"subscription","customer":"cus_456","subscription":"sub_789","status":"open","success_url":"https://ok.com","cancel_url":"https://cancel.com","url":"https://checkout.com","metadata":{"key":"value"}}';
-    
-    StripeCheckoutResponseWrapper resp = (StripeCheckoutResponseWrapper)JSON.deserialize(jsonResponse, StripeCheckoutResponseWrapper.class);
-    
+
+    StripeCheckoutResponseWrapper resp = (StripeCheckoutResponseWrapper) JSON.deserialize(
+      jsonResponse,
+      StripeCheckoutResponseWrapper.class
+    );
+
     System.assertEquals('cs_123', resp.id);
     System.assertEquals('checkout.session', resp.objectType);
     System.assertEquals('subscription', resp.mode);
@@ -38,8 +40,8 @@ static void testResponseWrapperDeserialization() {
     System.assertEquals('https://cancel.com', resp.cancel_url);
     System.assertEquals('https://checkout.com', resp.url);
     System.assertEquals('value', resp.metadata.get('key'));
-}
-    static void myUnitTest() {
-        // TO DO: implement unit test
-    }
+  }
+  static void myUnitTest() {
+    // TO DO: implement unit test
+  }
 }

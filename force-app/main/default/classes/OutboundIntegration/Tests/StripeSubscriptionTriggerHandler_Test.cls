@@ -12,7 +12,7 @@
 //  * coverage, and prevent regressions. All Apex classes are
 //  * required to have at least 75% code coverage in order to be deployed
 //  * to a production org. In addition, all triggers must have some code coverage.
-//  * 
+//  *
 //  * The @isTest class annotation indicates this class only contains test
 //  * methods. Classes defined with the @isTest annotation do not count against
 //  * the org size limit for all Apex scripts.
@@ -98,57 +98,52 @@
 
 @isTest
 private class StripeSubscriptionTriggerHandler_Test {
+  private static Stripe_Subscription__c setupTestRecord() {
+    Stripe_Customer__c cust = new Stripe_Customer__c(
+      Stripe_Customer_Id__c = 'cust_test_123',
+      Customer_Email__c = 'jtowers@example.com'
+    );
+    insert cust;
 
-    private static Stripe_Subscription__c setupTestRecord() {
-        Stripe_Customer__c cust = new Stripe_Customer__c(
-            Stripe_Customer_Id__c = 'cust_test_123',
-            Customer_Email__c = 'jtowers@example.com'
-        );
-        insert cust;
+    Stripe_Subscription__c sub = new Stripe_Subscription__c(
+      Stripe_Customer__c = cust.Id,
+      Sync_Status__c = 'Draft',
+      Status__c = 'Active',
+      Product_Plan_Name__c = 'Basic Plan'
+    );
+    insert sub;
+    return sub;
+  }
 
-        Stripe_Subscription__c sub = new Stripe_Subscription__c(
-            Stripe_Customer__c = cust.Id,
-            Sync_Status__c = 'Draft',
-            Status__c = 'Active',
-            Product_Plan_Name__c = 'Basic Plan'
-        );
-        insert sub;
-        return sub;
-    }
+  @isTest
+  static void testInsertFiresHandler() {
+    Test.startTest();
+    Stripe_Subscription__c sub = setupTestRecord();
+    Test.stopTest();
+  }
 
-    @isTest
-    static void testInsertFiresHandler() {
-        Test.startTest();
-        Stripe_Subscription__c sub = setupTestRecord();
-        Test.stopTest();
-    }
+  @isTest
+  static void testUpdateFiresHandlerWithoutQueueableExecution() {
+    Stripe_Subscription__c sub = setupTestRecord();
 
-    @isTest
-    static void testUpdateFiresHandlerWithoutQueueableExecution() {
-        Stripe_Subscription__c sub = setupTestRecord();
+    // Bypass queueable to prevent NullPointerException
+    TriggerBypass.bypassStripeSubscription = true;
 
-        // Bypass queueable to prevent NullPointerException
-        TriggerBypass.bypassStripeSubscription = true;
+    Test.startTest();
+    sub.Status__c = 'Canceled';
+    sub.Product_Plan_Name__c = 'Pro Plan';
+    update sub; // Trigger fires, but queueable skipped
+    Test.stopTest();
 
-        Test.startTest();
-        sub.Status__c = 'Canceled';
-        sub.Product_Plan_Name__c = 'Pro Plan';
-        update sub; // Trigger fires, but queueable skipped
-        Test.stopTest();
+    TriggerBypass.bypassStripeSubscription = false;
 
-        TriggerBypass.bypassStripeSubscription = false;
-
-        // Verify field changes
-        Stripe_Subscription__c updatedSub = [
-            SELECT Status__c, Product_Plan_Name__c
-            FROM Stripe_Subscription__c
-            WHERE Id = :sub.Id
-        ];
-        System.assertEquals('Canceled', updatedSub.Status__c);
-        System.assertEquals('Pro Plan', updatedSub.Product_Plan_Name__c);
-    }
+    // Verify field changes
+    Stripe_Subscription__c updatedSub = [
+      SELECT Status__c, Product_Plan_Name__c
+      FROM Stripe_Subscription__c
+      WHERE Id = :sub.Id
+    ];
+    System.assertEquals('Canceled', updatedSub.Status__c);
+    System.assertEquals('Pro Plan', updatedSub.Product_Plan_Name__c);
+  }
 }
-
-
-
-
