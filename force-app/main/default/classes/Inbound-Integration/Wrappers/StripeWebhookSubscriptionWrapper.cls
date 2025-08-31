@@ -26,7 +26,6 @@ public class StripeWebhookSubscriptionWrapper {
     public SubscriptionItemsWrapper items { get; set; }
     // Jason added MetadataWrapper 8/29
     public MetadataWrapper metadata { get; set; }
-    public MetadataWrapper metadata { get; set; }
   }
 
   public class SubscriptionItemsWrapper {

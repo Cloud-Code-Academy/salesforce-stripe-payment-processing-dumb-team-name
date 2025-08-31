@@ -81,8 +81,6 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Assert.areEqual(422, result, 'Expected response code 422');
   }
 
-  @isTest
-
   /**
    * @description This tests handling of a request body that does not include the record id for the Stripe_Subscription__c record in Salesforce. This method should return a response code of 422
    */
