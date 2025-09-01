@@ -75,9 +75,16 @@ Once installed and configured, the integration runs automatically:
 
 Outbound Flow
 
+Creating Stripe Customer
 ![Creating a Stripe Customer](images/Stripe%20Create%20Customer.drawio.png)
+
+Creating Stripe Subscription
 ![Creating a Stripe Subscription](images/Stripe%20Create%20Subscription.drawio.png)
+
+Updating Stripe Customer
 ![Updating a Stripe Customer](images/Stripe%20Update%20Customer.drawio.png)
+
+Updating Stripe Subscription
 ![Updating a Stripe Subscription](images/Stripe%20Update%20Subscription.drawio.png)
 
 
