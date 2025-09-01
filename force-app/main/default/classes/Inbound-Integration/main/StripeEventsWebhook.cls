@@ -2,7 +2,7 @@
  * @description Listens for Stripe webhook events and routes them to the appropriate strategy for handling
  *
  * @author Jonathan Lyles
- * @date August 27, 2025
+ * @date August 30, 2025
  * @group Stripe Inbound Integration
  */
 
@@ -10,6 +10,7 @@
 //@RestResource(urlMapping='/webhook/stripe/*')
 global without sharing class StripeEventsWebhook {
   public enum types {
+    customer_created,
     customer_updated,
     customer_subscription_created,
     customer_subscription_updated,
@@ -167,7 +168,6 @@ global without sharing class StripeEventsWebhook {
       return false;
     }
 
-    // Parse header (t=timestamp,v1=signature,...)
     Map<String, String> sigMap = new Map<String, String>();
 
     for (String part : sigHeader.split(',')) {
@@ -196,6 +196,13 @@ global without sharing class StripeEventsWebhook {
 
     // Compare
     return hashHex.equalsIgnoreCase(expectedSig);
+  }
+
+  public static String handleReservedKeywords(String textBody) {
+    // object and currency are reserved keywords
+    textBody = textBody.replaceAll('object', 'object_x');
+    textBody = textBody.replaceAll('currency', 'currency_x');
+    return textBody;
   }
 
   public class StripeEventsWebhookException extends Exception {

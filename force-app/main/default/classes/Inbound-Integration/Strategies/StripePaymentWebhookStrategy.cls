@@ -2,7 +2,7 @@
  * @description Logic for handling Stripe invoice webhook events
  *
  * @author Jonathan Lyles
- * @date August 25, 2025
+ * @date August 31, 2025
  * @group Stripe Inbound Integration
  */
 
@@ -21,14 +21,7 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
     );
 
     Integer result;
-    switch on wrapper.type {
-      when 'invoice.paid' {
-        result = invoicePaid(wrapper);
-      }
-      // when 'customer.subscription.deleted' {
-      //   result = invoicePaymentFailed(wrapper);
-      // }
-    }
+    result = invoicePayment(wrapper);
 
     return result;
   }
@@ -38,25 +31,29 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
    *
    * @return Integer http response code
    */
-  public Integer invoicePaid(StripeWebhookInvoiceWrapper wrapper) {
+  public Integer invoicePayment(StripeWebhookInvoiceWrapper wrapper) {
     Integer result;
-    //TODO: add validation that wrapper has all the required data to proceed
+
     Stripe_Subscription__c sub = getSubscription(wrapper);
+    if (sub == null) {
+      Logger.error('Response code 400: Bad request. Missing Subscription');
+      return 400;
+    }
 
     Payment_Transaction__c payment = new Payment_Transaction__c();
-    payment.Amount__c = wrapper.data.object_x.amount_paid;
+    // To decimal
+    payment.Amount__c = wrapper.data.object_x.amount_paid / 100;
     payment.Currency__c = wrapper.data.object_x.currency_x;
     payment.Transaction_Date__c = DateUtils.timestampToDatetimeConverter(
       wrapper.created
     );
 
-    // Payment_Method_Type__c field hidden: invoice.paid request body does not specify the payment method type
-
-    // Busines Decision: Stripe Payment Intent ID is populated with the invoice ID
     payment.Stripe_Payment_Intent_ID__c = wrapper.data.object_x.id;
-    payment.Status__c = 'Succeeded';
+    payment.Status__c = wrapper.data.object_x.status;
+
     payment.Stripe_Customer__c = sub.Stripe_Customer__c;
     payment.Stripe_Subscription__c = sub.Id;
+    payment.Payment_Method_Type__c = sub.
 
     try {
       insert payment;
@@ -78,17 +75,6 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
   }
 
   /**
-   * @description The logic for handling invoice payment failed events
-   *
-   * @return Integer Http response code
-   */
-
-  //TODO: still needs to be done
-  // public Integer invoicePaymentFailed(StripeWebhookInvoiceWrapper wrapper) {
-  //   //TODO: Do I need a separate event or use invoicePaid? Does a failed payment contain a request that has all the info needed to use that method?
-  // }
-
-  /**
    * @description Helper method retrieves Stripe Subscription record
    *
    * @return Stripe_Subscription__c
@@ -102,31 +88,20 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
       SELECT Id, Stripe_Customer__c, Stripe_Subscription_ID__c
       FROM Stripe_Subscription__c
       WHERE Id = :subId
-      //Jason changed 8/29/25
-      //WHERE Stripe_Subscription_ID__c = :subId
       LIMIT 1
     ];
 
     return sub;
   }
 
-  //TODO: Do I still need this?
   /**
    * @description Helpler method. Gets Stripe subscription id
    *
    * @return String Stripe subscription Id
    */
   public String getSubscriptionId(StripeWebhookInvoiceWrapper wrapper) {
-    // String subId = wrapper.data.object_x.lines.data[0]
-    //   .parent.subscription_item_details.subscription;
-    //Jason added 8/29/25
-    String subId = wrapper.data.object_x.lines.data[0].metadata.get('Salesforce_Subscription_Id');
+    String subId = wrapper.data.object_x.lines.data[0]
+      .metadata.Salesforce_Subscription_Id;
     return subId;
   }
-
-  /**
-   * @description Helper method. Gets the Salesforce Stripe_Subscription__c record
-   *
-   * @return Stripe_Subscription__c
-   */
 }

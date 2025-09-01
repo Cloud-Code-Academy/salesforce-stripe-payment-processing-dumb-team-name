@@ -30,25 +30,19 @@ public with sharing class StripeWebhookInvoiceWrapper {
   }
 
   public class LinesWrapper {
-    public List<LinesData> data { get; set; }
+    public List<LineItemWrapper> data { get; set; }
   }
 
-  public class LinesData {
-    public ParentWrapper parent { get; set; }
-        //Jason added 8/29
-    public Map<String,String> metadata {get; set;}
-  }
-  
-
-  public class ParentWrapper {
-    //public InvoiceItemDetails invoice_item_details { get; set; }
-    public SubscriptionDetails subscription_item_details { get; set; }
+  public class LineItemWrapper {
+    public String id { get; set; }
+    public String object_x { get; set; }
+    public MetadataWrapper metadata { get; set; }
+    // do I need other fields?
   }
 
-  //TODO: remove if not needed (TBD)
-  // public class InvoiceItemDetails {
-  //   public String subscription { get; set; }
-  // }
+  public class MetadataWrapper {
+    public String Salesforce_Subscription_Id { get; set; }
+  }
 
   public class SubscriptionDetails {
     public String subscription { get; set; }

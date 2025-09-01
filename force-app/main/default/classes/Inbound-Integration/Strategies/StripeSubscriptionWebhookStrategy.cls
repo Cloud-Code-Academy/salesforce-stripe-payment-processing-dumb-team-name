@@ -13,6 +13,12 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    */
   public Integer handle(String requestBody) {
     Logger.info('Executing subscription strategy.');
+
+    //Already done in StripeEventsWebhook
+    // String normalisedRequestBody = StripeEventsWebhook.handleReservedKeywords(
+    //   requestBody
+    // );
+
     StripeWebhookSubscriptionWrapper wrapper = StripeWebhookSubscriptionWrapper.parse(
       requestBody
     );
@@ -40,22 +46,13 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    * @return Integer Http response code
    */
   public Integer subscriptionCreate(StripeWebhookSubscriptionWrapper wrapper) {
-    //Jason changed 8/29
-    //String SubscriptionRecordId = wrapper.data.previous_attributes.metadata.Subscription_Id;
     String SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
 
-    try {
-      if (SubscriptionId == null) {
-        throw new StripeSubscriptionWebhookStrategyException(
-          'Subscription Id is null'
-        );
-      }
-    } catch (StripeSubscriptionWebhookStrategyException e) {
-      Logger.error(e.getMessage());
+    if (SubscriptionId == null) {
+      Logger.error('Response: 400. Bad Request: Subscription Id is null');
       Logger.saveLog();
-      return 422;
+      return 400;
     }
-
     Stripe_Subscription__c sub = new Stripe_Subscription__c();
 
     try {
@@ -78,40 +75,31 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
         LIMIT 1
       ];
     } catch (QueryException e) {
-      Logger.error('Query Exception  : ' + e.getMessage());
+      Logger.error(
+        'Response: 404. Not Found. Details: Query Exception  : ' +
+        e.getMessage()
+      );
       Logger.saveLog();
-      return 422;
-    }
-    try {
-      sub = [
-        SELECT
-          Id,
-          Amount__c,
-          Currency__c,
-          Current_Period_End__c,
-          Current_Period_Start__c,
-          Product_Plan_Name__c,
-          Status__c,
-          Stripe_Customer__c,
-          Stripe_Price_ID__c,
-          Stripe_Subscription_ID__c,
-          Stripe_Subscription_Item_ID__c,
-          Sync_Status__c
-        FROM Stripe_Subscription__c
-        WHERE Id = :SubscriptionId
-        LIMIT 1
-      ];
-    } catch (QueryException e) {
-      Logger.error('Query Exception  : ' + e.getMessage());
-      Logger.saveLog();
-      return 422;
+      return 404;
     }
 
-    //Check this
     sub.Stripe_Subscription_ID__c = wrapper.data.object_x.id;
     sub.Stripe_Subscription_Item_ID__c = wrapper.data.object_x.items.data[0].id;
-    sub.Stripe_Subscription_Item_ID__c = wrapper.data.object_x.items.data[0].id;
     sub.Sync_Status__c = 'Synced';
+    sub.Status__c = 'Active';
+    sub.Current_Period_Start__c = DateUtils.timestampToDatetimeConverter(
+      wrapper.data.object_x.items.data[0].current_period_start
+    );
+    sub.Current_Period_End__c = DateUtils.timestampToDatetimeConverter(
+      wrapper.data.object_x.items.data[0].current_period_end
+    );
+    sub.Stripe_Price_ID__c = wrapper.data.object_x.items.data[0].plan.id;
+    sub.Product_Plan_Name__c = wrapper.data.object_x.items.data[0].plan.product;
+    sub.Amount__c = double.valueOf(
+      wrapper.data.object_x.items.data[0].plan.amount_decimal / 100
+    );
+
+    sub.Currency__c = wrapper.data.object_x.items.data[0].price.currency_x;
 
     Integer response;
 
@@ -120,28 +108,25 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       Logger.info(
         'Subscription ' +
           subscriptionId +
-          subscriptionId +
           ' successfully synced after creation.'
       );
       response = 204;
     } catch (DmlException e) {
       Logger.error(e.getMessage());
       Logger.error(
-        'DML Exception. Subscription ' +
+        'Response code: 422. Unprocessable Entity. DML Exception. Subscription ' +
           subscriptionId +
-          subscriptionId +
-          ' was not successfully synced.'
+          ' was not successfully synced. Details: ' +
+          e.getMessage()
       );
       response = 422;
     } catch (Exception e) {
       Logger.error(
-        'Unexpected exception. Subscription record ' +
-          subscriptionId +
+        'Response code: 500. Unexpected exception. Subscription record ' +
           subscriptionId +
           ' was not successfully synced. Error message: ' +
           e.getMessage()
       );
-
       response = 500;
     } finally {
       Logger.saveLog();
@@ -155,20 +140,14 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    * @return Integer Http response code
    */
   public Integer subscriptionUpdate(StripeWebhookSubscriptionWrapper wrapper) {
-    // Note: This is referring to the record Id in Salesforce which is sent in the metadata of the request
     String SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
 
-    try {
-      if (SubscriptionId == null) {
-        throw new StripeSubscriptionWebhookStrategyException(
-          'Subscription Id is null'
-        );
-      }
-    } catch (StripeSubscriptionWebhookStrategyException e) {
-      Logger.error(e.getMessage());
+    if (SubscriptionId == null) {
+      Logger.error('Response: 400. Bad Request: Subscription Id is null');
       Logger.saveLog();
-      return 422;
+      return 400;
     }
+
     Stripe_Subscription__c sub = new Stripe_Subscription__c();
     try {
       sub = [
@@ -186,13 +165,16 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
           Stripe_Subscription_Item_ID__c,
           Sync_Status__c
         FROM Stripe_Subscription__c
-        WHERE Id = :subscriptionId
+        WHERE Id = :SubscriptionId
         LIMIT 1
       ];
     } catch (QueryException e) {
-      Logger.error('Query Exception: ' + e.getMessage());
+      Logger.error(
+        'Response: 404. Not Found. Details: Query Exception  : ' +
+        e.getMessage()
+      );
       Logger.saveLog();
-      return 422;
+      return 404;
     }
 
     Integer amount =
@@ -241,7 +223,14 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    * @return Integer Http response code
    */
   public Integer subscriptionDelete(StripeWebhookSubscriptionWrapper wrapper) {
-    String SubscriptionRecordId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
+    String SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
+
+    if (SubscriptionId == null) {
+      System.debug('SubId is null');
+      Logger.error('Response: 400. Bad Request: Subscription Id is null');
+      Logger.saveLog();
+      return 400;
+    }
 
     Stripe_Subscription__c sub = new Stripe_Subscription__c();
 
@@ -254,40 +243,23 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
           Current_Period_End__c,
           Current_Period_Start__c,
           Product_Plan_Name__c,
+          Status__c,
+          Stripe_Customer__c,
           Stripe_Price_ID__c,
           Stripe_Subscription_ID__c,
           Stripe_Subscription_Item_ID__c,
           Sync_Status__c
         FROM Stripe_Subscription__c
-        WHERE Id = :SubscriptionRecordId
+        WHERE Id = :SubscriptionId
         LIMIT 1
       ];
     } catch (QueryException e) {
-      Logger.error('QueryException: ' + e.getMessage());
+      Logger.error(
+        'Response: 404. Not Found. Details: Query Exception  : ' +
+        e.getMessage()
+      );
       Logger.saveLog();
-      return 422;
-    }
-    try {
-      sub = [
-        SELECT
-          Id,
-          Amount__c,
-          Currency__c,
-          Current_Period_End__c,
-          Current_Period_Start__c,
-          Product_Plan_Name__c,
-          Stripe_Price_ID__c,
-          Stripe_Subscription_ID__c,
-          Stripe_Subscription_Item_ID__c,
-          Sync_Status__c
-        FROM Stripe_Subscription__c
-        WHERE Id = :SubscriptionRecordId
-        LIMIT 1
-      ];
-    } catch (QueryException e) {
-      Logger.error('QueryException: ' + e.getMessage());
-      Logger.saveLog();
-      return 422;
+      return 404;
     }
 
     sub.Status__c = 'Canceled';
