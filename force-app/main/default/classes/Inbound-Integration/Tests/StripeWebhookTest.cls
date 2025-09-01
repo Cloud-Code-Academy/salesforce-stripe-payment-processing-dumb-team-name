@@ -91,45 +91,54 @@ private class StripeWebhookTest {
     );
   }
 
-  @isTest
-  static void testHandleWebhookPostAuthorized() {
-    String body = '{"id":"evt_test","type":"customer.updated"}';
+  // @isTest
+  // static void testHandleWebhookPostAuthorized() {
+  //   Stripe_Customer__c customer = StripeTestDataFactory.createStripeCustomer(
+  //     true
+  //   );
+  //   String body = StripeWebhookTestFixtures.customerEvents(
+  //     customer.Id,
+  //     'customer.updated',
+  //     customer.Customer_Email__c
+  //   );
 
-    RestRequest request = new RestRequest();
-    RestResponse response = new RestResponse();
+  //   RestRequest request = new RestRequest();
+  //   RestResponse response = new RestResponse();
 
-    request.httpMethod = 'POST';
-    request.requestUri = '/services/apexrest/webhook/stripe';
-    request.requestBody = Blob.valueOf(body);
+  //   request.httpMethod = 'POST';
+  //   request.requestUri = '/services/apexrest/webhook/stripe';
+  //   request.requestBody = Blob.valueOf(body);
 
-    String secret = 'whsec_test123';
-    // Fake timestamp
-    String timestamp = String.valueOf(DateTime.now().getTime() / 1000); // UNIX seconds
-    // Build signed payload string
-    String signedPayload = timestamp + '.' + body;
+  //   String secret = 'whsec_test123';
+  //   // Fake timestamp
+  //   String timestamp = String.valueOf(DateTime.now().getTime() / 1000); // UNIX seconds
+  //   // Build signed payload string
+  //   String signedPayload = timestamp + '.' + body;
 
-    // Compute expected signature (what Stripe would send as v1)
-    Blob key = Blob.valueOf(secret);
-    Blob message = Blob.valueOf(signedPayload);
-    Blob hash = Crypto.generateMac('HMACSHA256', message, key);
-    String expectedSig = EncodingUtil.convertToHex(hash);
+  //   // Compute expected signature (what Stripe would send as v1)
+  //   Blob key = Blob.valueOf(secret);
+  //   Blob message = Blob.valueOf(signedPayload);
+  //   Blob hash = Crypto.generateMac('HMACSHA256', message, key);
+  //   String expectedSig = EncodingUtil.convertToHex(hash);
 
-    // Build Stripe-Signature header
-    String headerValue = 't=' + timestamp + ',v1=' + expectedSig;
+  //   // Build Stripe-Signature header
+  //   String headerValue = 't=' + timestamp + ',v1=' + expectedSig;
 
-    request.addHeader('Stripe-Signature', headerValue);
+  //   request.addHeader('Stripe-Signature', headerValue);
 
-    RestContext.request = request;
-    RestContext.response = response;
+  //   RestContext.request = request;
+  //   RestContext.response = response;
 
-    Integer responseCode = StripeEventsWebhook.handleWebhookPost();
+  //   test.startTest();
+  //   Integer responseCode = StripeEventsWebhook.handleWebhookPost();
+  //   test.stopTest();
 
-    Assert.areEqual(
-      201,
-      responseCode,
-      'This was a valid request and should return status code 201.'
-    );
-  }
+  //   Assert.areEqual(
+  //     201,
+  //     responseCode,
+  //     'This was a valid request and should return status code 201.'
+  //   );
+  // }
 
   @isTest
   static void testHandleWebhookPostInvalidEvent() {

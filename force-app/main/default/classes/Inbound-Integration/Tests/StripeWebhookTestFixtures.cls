@@ -10,13 +10,13 @@ public with sharing class StripeWebhookTestFixtures {
     return jsonString =
       '{' +
       '  "id": "evt_1Rz0Hd4hwnEBsWxgtcqaRL5N",' +
-      '  "object_x": "event",' +
+      '  "object": "event",' +
       '  "api_version": "2025-05-28.basil",' +
       '  "created": 1755889553,' +
       '  "data": {' +
-      '    "object_x": {' +
+      '    "object": {' +
       '      "id": "sub_1RwbCy4hwnEBsWxgVxLeHnl4",' +
-      '      "object_x": "subscription",' +
+      '      "object": "subscription",' +
       '      "application": null,' +
       '      "application_fee_percent": null,' +
       '      "automatic_tax": {' +
@@ -40,7 +40,7 @@ public with sharing class StripeWebhookTestFixtures {
       '      },' +
       '      "collection_method": "charge_automatically",' +
       '      "created": 1755316508,' +
-      '      "currency_x": "cad",' +
+      '      "currency": "cad",' +
       '      "customer": "cus_SsFuuZiYsuPb1f",' +
       '      "days_until_due": null,' +
       '      "default_payment_method": null,' +
@@ -56,11 +56,11 @@ public with sharing class StripeWebhookTestFixtures {
       '        }' +
       '      },' +
       '      "items": {' +
-      '        "object_x": "list",' +
+      '        "object": "list",' +
       '        "data": [' +
       '          {' +
       '            "id": "si_Supx1o3IWkY4Dg",' +
-      '            "object_x": "subscription_item",' +
+      '            "object": "subscription_item",' +
       '            "billing_thresholds": null,' +
       '            "created": 1755889553,' +
       '            "current_period_end": 1755921308,' +
@@ -69,13 +69,13 @@ public with sharing class StripeWebhookTestFixtures {
       '            "metadata": {},' +
       '            "plan": {' +
       '              "id": "plan_1Rz0Hc4hwnEBsWxgyJGgzHbj",' +
-      '              "object_x": "plan",' +
+      '              "object": "plan",' +
       '              "active": false,' +
       '              "amount": 4000,' +
       '              "amount_decimal": "4000",' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755889552,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "interval": "week",' +
       '              "interval_count": 1,' +
       '              "livemode": false,' +
@@ -90,11 +90,11 @@ public with sharing class StripeWebhookTestFixtures {
       '            },' +
       '            "price": {' +
       '              "id": "price_1Rz0Hc4hwnEBsWxgyJGgzHbj",' +
-      '              "object_x": "price",' +
+      '              "object": "price",' +
       '              "active": false,' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755889552,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "custom_unit_amount": null,' +
       '              "livemode": false,' +
       '              "lookup_key": null,' +
@@ -127,7 +127,7 @@ public with sharing class StripeWebhookTestFixtures {
       '      "latest_invoice": "in_1RwbCz4hwnEBsWxgDF7yCQOp",' +
       '      "livemode": false,' +
       '      "metadata": { ' +
-      '         "Subscription_Id": "' +
+      '         "Salesforce_Subscription_Id": "' +
       salesforceSubscriptionId +
       '"' +
       '      },' +
@@ -144,13 +144,13 @@ public with sharing class StripeWebhookTestFixtures {
       '      "pending_update": null,' +
       '      "plan": {' +
       '        "id": "plan_1Rz0Hc4hwnEBsWxgyJGgzHbj",' +
-      '        "object_x": "plan",' +
+      '        "object": "plan",' +
       '        "active": false,' +
       '        "amount": 3300,' +
       '        "amount_decimal": "3300",' +
       '        "billing_scheme": "per_unit",' +
       '        "created": 1755889552,' +
-      '        "currency_x": "cad",' +
+      '        "currency": "cad",' +
       '        "interval": "week",' +
       '        "interval_count": 1,' +
       '        "livemode": false,' +
@@ -187,7 +187,7 @@ public with sharing class StripeWebhookTestFixtures {
       '        "data": [' +
       '          {' +
       '            "id": "si_SsLuBv2Z0Sn9rR",' +
-      '            "object_x": "subscription_item",' +
+      '            "object": "subscription_item",' +
       '            "billing_thresholds": null,' +
       '            "created": 1755316509,' +
       '            "current_period_end": 1755921308,' +
@@ -196,13 +196,13 @@ public with sharing class StripeWebhookTestFixtures {
       '            "metadata": {},' +
       '            "plan": {' +
       '              "id": "price_1Rwb2Y4hwnEBsWxgMVZI0PJP",' +
-      '              "object_x": "plan",' +
+      '              "object": "plan",' +
       '              "active": true,' +
       '              "amount": 2000,' +
       '              "amount_decimal": "2000",' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755315862,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "interval": "week",' +
       '              "interval_count": 1,' +
       '              "livemode": false,' +
@@ -217,11 +217,11 @@ public with sharing class StripeWebhookTestFixtures {
       '            },' +
       '            "price": {' +
       '              "id": "price_1Rwb2Y4hwnEBsWxgMVZI0PJP",' +
-      '              "object_x": "price",' +
+      '              "object": "price",' +
       '              "active": true,' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755315862,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "custom_unit_amount": null,' +
       '              "livemode": false,' +
       '              "lookup_key": "Premium_Hotdogs-680e460",' +
@@ -274,13 +274,13 @@ public with sharing class StripeWebhookTestFixtures {
     return jsonString =
       '{' +
       '  "id": "evt_1Rz0Hd4hwnEBsWxgtcqaRL5N",' +
-      '  "object_x": "event",' +
+      '  "object": "event",' +
       '  "api_version": "2025-05-28.basil",' +
       '  "created": 1755889553,' +
       '  "data": {' +
-      '    "object_x": {' +
+      '    "object": {' +
       '      "id": "sub_1RwbCy4hwnEBsWxgVxLeHnl4",' +
-      '      "object_x": "subscription",' +
+      '      "object": "subscription",' +
       '      "application": null,' +
       '      "application_fee_percent": null,' +
       '      "automatic_tax": {' +
@@ -304,7 +304,7 @@ public with sharing class StripeWebhookTestFixtures {
       '      },' +
       '      "collection_method": "charge_automatically",' +
       '      "created": 1755316508,' +
-      '      "currency_x": "cad",' +
+      '      "currency": "cad",' +
       '      "customer": "cus_SsFuuZiYsuPb1f",' +
       '      "days_until_due": null,' +
       '      "default_payment_method": null,' +
@@ -320,11 +320,11 @@ public with sharing class StripeWebhookTestFixtures {
       '        }' +
       '      },' +
       '      "items": {' +
-      '        "object_x": "list",' +
+      '        "object": "list",' +
       '        "data": [' +
       '          {' +
       '            "id": "si_Supx1o3IWkY4Dg",' +
-      '            "object_x": "subscription_item",' +
+      '            "object": "subscription_item",' +
       '            "billing_thresholds": null,' +
       '            "created": 1755889553,' +
       '            "current_period_end": 1755921308,' +
@@ -333,13 +333,13 @@ public with sharing class StripeWebhookTestFixtures {
       '            "metadata": {},' +
       '            "plan": {' +
       '              "id": "plan_1Rz0Hc4hwnEBsWxgyJGgzHbj",' +
-      '              "object_x": "plan",' +
+      '              "object": "plan",' +
       '              "active": false,' +
       '              "amount": 4000,' +
       '              "amount_decimal": "4000",' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755889552,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "interval": "week",' +
       '              "interval_count": 1,' +
       '              "livemode": false,' +
@@ -354,11 +354,11 @@ public with sharing class StripeWebhookTestFixtures {
       '            },' +
       '            "price": {' +
       '              "id": "price_1Rz0Hc4hwnEBsWxgyJGgzHbj",' +
-      '              "object_x": "price",' +
+      '              "object": "price",' +
       '              "active": false,' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755889552,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "custom_unit_amount": null,' +
       '              "livemode": false,' +
       '              "lookup_key": null,' +
@@ -391,7 +391,7 @@ public with sharing class StripeWebhookTestFixtures {
       '      "latest_invoice": "in_1RwbCz4hwnEBsWxgDF7yCQOp",' +
       '      "livemode": false,' +
       '      "metadata": { ' +
-      '         "Subscription_Id": null' +
+      '         "Salesforce_Subscription_Id": null' +
       '     },' +
       '      "next_pending_invoice_item_invoice": null,' +
       '      "on_behalf_of": null,' +
@@ -406,13 +406,13 @@ public with sharing class StripeWebhookTestFixtures {
       '      "pending_update": null,' +
       '      "plan": {' +
       '        "id": "plan_1Rz0Hc4hwnEBsWxgyJGgzHbj",' +
-      '        "object_x": "plan",' +
+      '        "object": "plan",' +
       '        "active": false,' +
       '        "amount": 3300,' +
       '        "amount_decimal": "3300",' +
       '        "billing_scheme": "per_unit",' +
       '        "created": 1755889552,' +
-      '        "currency_x": "cad",' +
+      '        "currency": "cad",' +
       '        "interval": "week",' +
       '        "interval_count": 1,' +
       '        "livemode": false,' +
@@ -449,7 +449,7 @@ public with sharing class StripeWebhookTestFixtures {
       '        "data": [' +
       '          {' +
       '            "id": "si_SsLuBv2Z0Sn9rR",' +
-      '            "object_x": "subscription_item",' +
+      '            "object": "subscription_item",' +
       '            "billing_thresholds": null,' +
       '            "created": 1755316509,' +
       '            "current_period_end": 1755921308,' +
@@ -458,13 +458,13 @@ public with sharing class StripeWebhookTestFixtures {
       '            "metadata": {},' +
       '            "plan": {' +
       '              "id": "price_1Rwb2Y4hwnEBsWxgMVZI0PJP",' +
-      '              "object_x": "plan",' +
+      '              "object": "plan",' +
       '              "active": true,' +
       '              "amount": 2000,' +
       '              "amount_decimal": "2000",' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755315862,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "interval": "week",' +
       '              "interval_count": 1,' +
       '              "livemode": false,' +
@@ -479,11 +479,11 @@ public with sharing class StripeWebhookTestFixtures {
       '            },' +
       '            "price": {' +
       '              "id": "price_1Rwb2Y4hwnEBsWxgMVZI0PJP",' +
-      '              "object_x": "price",' +
+      '              "object": "price",' +
       '              "active": true,' +
       '              "billing_scheme": "per_unit",' +
       '              "created": 1755315862,' +
-      '              "currency_x": "cad",' +
+      '              "currency": "cad",' +
       '              "custom_unit_amount": null,' +
       '              "livemode": false,' +
       '              "lookup_key": "Premium_Hotdogs-680e460",' +
@@ -530,5 +530,68 @@ public with sharing class StripeWebhookTestFixtures {
       stripeEventName +
       '"' +
       '}';
+  }
+
+  public static String customerEvents(
+    String customerId,
+    String eventType,
+    String customerEmail
+  ) {
+    String jsonString =
+      '{' +
+      '  "id": "evt_1S1hMS4hwnEBsWxgeI2BQzSC",' +
+      '  "object": "event",' +
+      '  "api_version": "2025-05-28.basil",' +
+      '  "created": 1756531800,' +
+      '  "data": {' +
+      '    "object": {' +
+      '      "id": "' +
+      customerId +
+      '",' +
+      '      "object": "customer",' +
+      '      "address": null,' +
+      '      "balance": 0,' +
+      '      "created": 1755208188,' +
+      '      "currency": "cad",' +
+      '      "default_source": null,' +
+      '      "delinquent": false,' +
+      '      "description": null,' +
+      '      "discount": null,' +
+      '      "email": "' +
+      customerEmail +
+      '",' +
+      '      "invoice_prefix": "OLNXZ0KT",' +
+      '      "invoice_settings": {' +
+      '        "custom_fields": null,' +
+      '        "default_payment_method": "pm_1Rwbhi4hwnEBsWxgMJbMqE9S",' +
+      '        "footer": null,' +
+      '        "rendering_options": null' +
+      '      },' +
+      '      "livemode": false,' +
+      '      "metadata": {},' +
+      '      "name": "Bob548 TestFace548",' +
+      '      "next_invoice_sequence": 12,' +
+      '      "phone": null,' +
+      '      "preferred_locales": [],' +
+      '      "shipping": null,' +
+      '      "tax_exempt": "none",' +
+      '      "test_clock": null' +
+      '    },' +
+      '    "previous_attributes": {' +
+      '      "next_invoice_sequence": 11' +
+      '    }' +
+      '  },' +
+      '  "livemode": false,' +
+      '  "pending_webhooks": 1,' +
+      '  "request": {' +
+      '    "id": null,' +
+      '    "idempotency_key": null' +
+      '  },' +
+      '  "type": "' +
+      eventType +
+      '"' +
+      '}';
+
+    return jsonString;
   }
 }

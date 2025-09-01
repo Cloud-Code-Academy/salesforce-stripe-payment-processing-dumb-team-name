@@ -2,14 +2,15 @@
 public with sharing class StripeSubscriptionWebhookStrategyTest {
   @isTest
   static void testHandleCreateSubscriptionSuccess() {
-    Stripe_Customer__c newCustomer = new Stripe_Customer__c();
-    newCustomer.Customer_Email__c = 'test@email.com';
-    insert newCustomer;
-    Stripe_Subscription__c newSubscription = new Stripe_Subscription__c();
-    newSubscription.Stripe_Customer__c = newCustomer.Id;
-    //newSubscription.Stripe_Subscription_ID__c
-    //When the Stripe Subscription record is created is Salesforce, Stripe's subscription ID is not yet known. We will get this information from the webhook event.
-    insert newSubscription;
+    TriggerBypass.bypassStripeSubscription = true;
+
+    Stripe_Customer__c newCustomer = StripeTestDataFactory.createStripeCustomer(
+      true
+    );
+    Stripe_Subscription__c newSubscription = StripeTestDataFactory.createStripeSubscription(
+      true,
+      newCustomer.Id
+    );
 
     String subscriptionId = newSubscription.Id;
 
@@ -24,6 +25,8 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Integer result = strategy.handle(jsonString);
 
     Test.stopTest();
+
+    TriggerBypass.bypassStripeSubscription = false;
 
     Stripe_Subscription__c createdSubscription = [
       SELECT
@@ -78,7 +81,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
 
     Test.stopTest();
 
-    Assert.areEqual(422, result, 'Expected response code 422');
+    Assert.areEqual(400, result, 'Expected response code 400');
   }
 
   /**
@@ -105,7 +108,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
 
     Test.stopTest();
 
-    Assert.areEqual(422, result, 'Expected response code 422');
+    Assert.areEqual(400, result, 'Expected response code 400');
   }
 
   /**
@@ -132,19 +135,19 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
 
     Test.stopTest();
 
-    Assert.areEqual(422, result, 'Expected response code 422');
+    Assert.areEqual(400, result, 'Expected response code 400');
   }
 
   @isTest
   static void testHandleUpdateSubscriptionSuccess() {
-    Stripe_Customer__c newCustomer = new Stripe_Customer__c();
-    newCustomer.Customer_Email__c = 'test@email.com';
-    insert newCustomer;
-    Stripe_Subscription__c newSubscription = new Stripe_Subscription__c();
-    newSubscription.Stripe_Customer__c = newCustomer.Id;
-    //newSubscription.Stripe_Subscription_ID__c
-    //When the Stripe Subscription record is created is Salesforce, Stripe's subscription ID is not yet known. We will get this information from the webhook event.
-    insert newSubscription;
+    TriggerBypass.bypassStripeSubscription = true;
+    Stripe_Customer__c newCustomer = StripeTestDataFactory.createStripeCustomer(
+      true
+    );
+    Stripe_Subscription__c newSubscription = StripeTestDataFactory.createStripeSubscription(
+      true,
+      newCustomer.Id
+    );
 
     String subscriptionId = newSubscription.Id;
 
@@ -173,19 +176,21 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
       updatedSubscription.Amount__c,
       'Expected 80.00, actual: ' + updatedSubscription.Amount__c
     );
+    TriggerBypass.bypassStripeSubscription = false;
   }
 
   @isTest
   static void testHandleCancelSubscriptionSuccess() {
-    Stripe_Customer__c newCustomer = new Stripe_Customer__c();
-    newCustomer.Customer_Email__c = 'test@email.com';
-    insert newCustomer;
-    Stripe_Subscription__c newSubscription = new Stripe_Subscription__c();
-    newSubscription.Stripe_Customer__c = newCustomer.Id;
-    newSubscription.Stripe_Subscription_ID__c = 'sub_1RwbCy4hwnEBsWxgVxLeHnl4';
-    insert newSubscription;
+    TriggerBypass.bypassStripeSubscription = true;
+    Stripe_Customer__c newCustomer = StripeTestDataFactory.createStripeCustomer(
+      true
+    );
+    Stripe_Subscription__c newSubscription = StripeTestDataFactory.createStripeSubscription(
+      true,
+      newCustomer.Id
+    );
+    String subscriptionId = newSubscription.Id;
 
-    String subscriptionId = String.valueOf(newSubscription.Id);
     String jsonString = StripeWebhookTestFixtures.subscriptionEvents(
       subscriptionId,
       'customer.subscription.deleted'
@@ -212,5 +217,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
       'Expected status to be canceled, actual status: ' +
       updatedSubscription.Status__c
     );
+
+    TriggerBypass.bypassStripeSubscription = false;
   }
 }
