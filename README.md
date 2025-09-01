@@ -75,16 +75,16 @@ Once installed and configured, the integration runs automatically:
 ## 🌭 Architecture
 
 ### 🔹 Creating a Stripe Customer
-![Creating a Stripe Customer](images/stripe-create-customer.png)
+![Creating a Stripe Customer](images/Stripe%20Create%20Customer.drawio.png)
 
 ### 🔹 Creating a Stripe Subscription
-![Creating a Stripe Subscription](images/stripe-create-subscription.png)
+![Creating a Stripe Subscription](images/Stripe%20Create%20Subscription.drawio.png)
 
 ### 🔹 Updating a Stripe Customer
-![Updating a Stripe Customer](images/stripe-update-customer.png)
+![Updating a Stripe Customer](images/Stripe%20Update%20Customer.drawio.png)
 
 ### 🔹 Updating a Stripe Subscription
-![Updating a Stripe Subscription](images/stripe-update-subscription.png)
+![Updating a Stripe Subscription](images/Stripe%20Update%20Subscription.drawio.png)
 
 
 
