@@ -95,9 +95,11 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
     );
     sub.Stripe_Price_ID__c = wrapper.data.object_x.items.data[0].plan.id;
     sub.Product_Plan_Name__c = wrapper.data.object_x.items.data[0].plan.product;
-    sub.Amount__c = double.valueOf(
-      wrapper.data.object_x.items.data[0].plan.amount_decimal / 100
+
+    Double amountAsDouble = double.valueOf(
+      wrapper.data.object_x.items.data[0].plan.amount_decimal
     );
+    sub.Amount__c = amountAsDouble / 100;
 
     sub.Currency__c = wrapper.data.object_x.items.data[0].price.currency_x;
 
@@ -223,14 +225,23 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    * @return Integer Http response code
    */
   public Integer subscriptionDelete(StripeWebhookSubscriptionWrapper wrapper) {
-    String SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
+    TriggerBypass.bypassStripeSubscription = true;
+    String SubscriptionId;
 
-    if (SubscriptionId == null) {
+    try {
+      SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
+    } catch (NullPointerException e) {
       System.debug('SubId is null');
       Logger.error('Response: 400. Bad Request: Subscription Id is null');
       Logger.saveLog();
       return 400;
     }
+    // if (SubscriptionId == null) {
+    //   System.debug('SubId is null');
+    //   Logger.error('Response: 400. Bad Request: Subscription Id is null');
+    //   Logger.saveLog();
+    //   return 400;
+    // }
 
     Stripe_Subscription__c sub = new Stripe_Subscription__c();
 
@@ -276,6 +287,7 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
       return 500;
     }
     Logger.saveLog();
+    TriggerBypass.bypassStripeSubscription = false;
     return 204;
   }
 

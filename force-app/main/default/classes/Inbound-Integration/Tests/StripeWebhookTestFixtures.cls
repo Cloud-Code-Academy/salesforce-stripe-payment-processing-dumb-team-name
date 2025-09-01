@@ -1,3 +1,4 @@
+@IsTest
 public with sharing class StripeWebhookTestFixtures {
   public static String subscriptionEvents(
     String salesforceSubscriptionId,
