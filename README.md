@@ -73,7 +73,13 @@ Once installed and configured, the integration runs automatically:
 
 ## 🌭 Architecture
 
-Link to the Architecture Diagram
+Outbound Flow
+
+![Creating a Stripe Customer](images/Stripe%20Create%20Customer.drawio.png)
+![Creating a Stripe Subscription](images/Stripe%20Create%20Subscription.drawio.png)
+![Updating a Stripe Customer](images/Stripe%20Update%20Customer.drawio.png)
+![Updating a Stripe Subscription](images/Stripe%20Update%20Subscription.drawio.png)
+
 
 
 ## 💞 Contributing
