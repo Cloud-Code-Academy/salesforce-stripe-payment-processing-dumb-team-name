@@ -22,6 +22,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Test.startTest();
 
     StripeSubscriptionWebhookStrategy strategy = new StripeSubscriptionWebhookStrategy();
+    jsonString = StripeEventsWebhook.handleReservedKeywords(jsonString);
     Integer result = strategy.handle(jsonString);
 
     Test.stopTest();
@@ -77,6 +78,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Test.startTest();
 
     StripeSubscriptionWebhookStrategy strategy = new StripeSubscriptionWebhookStrategy();
+    jsonString = StripeEventsWebhook.handleReservedKeywords(jsonString);
     Integer result = strategy.handle(jsonString);
 
     Test.stopTest();
@@ -104,6 +106,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Test.startTest();
 
     StripeSubscriptionWebhookStrategy strategy = new StripeSubscriptionWebhookStrategy();
+    jsonString = StripeEventsWebhook.handleReservedKeywords(jsonString);
     Integer result = strategy.handle(jsonString);
 
     Test.stopTest();
@@ -131,6 +134,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Test.startTest();
 
     StripeSubscriptionWebhookStrategy strategy = new StripeSubscriptionWebhookStrategy();
+    jsonString = StripeEventsWebhook.handleReservedKeywords(jsonString);
     Integer result = strategy.handle(jsonString);
 
     Test.stopTest();
@@ -159,6 +163,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Test.startTest();
 
     StripeSubscriptionWebhookStrategy strategy = new StripeSubscriptionWebhookStrategy();
+    jsonString = StripeEventsWebhook.handleReservedKeywords(jsonString);
     Integer result = strategy.handle(jsonString);
 
     Test.stopTest();
@@ -199,6 +204,7 @@ public with sharing class StripeSubscriptionWebhookStrategyTest {
     Test.startTest();
 
     StripeSubscriptionWebhookStrategy strategy = new StripeSubscriptionWebhookStrategy();
+    jsonString = StripeEventsWebhook.handleReservedKeywords(jsonString);
     Integer result = strategy.handle(jsonString);
 
     Test.stopTest();

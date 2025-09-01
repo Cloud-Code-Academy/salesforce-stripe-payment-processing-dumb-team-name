@@ -226,22 +226,22 @@ public without sharing class StripeSubscriptionWebhookStrategy implements IStrip
    */
   public Integer subscriptionDelete(StripeWebhookSubscriptionWrapper wrapper) {
     TriggerBypass.bypassStripeSubscription = true;
-    String SubscriptionId;
+    String SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
 
-    try {
-      SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
-    } catch (NullPointerException e) {
-      System.debug('SubId is null');
-      Logger.error('Response: 400. Bad Request: Subscription Id is null');
-      Logger.saveLog();
-      return 400;
-    }
-    // if (SubscriptionId == null) {
+    // try {
+    //   SubscriptionId = wrapper.data.object_x.metadata.Salesforce_Subscription_Id;
+    // } catch (NullPointerException e) {
     //   System.debug('SubId is null');
     //   Logger.error('Response: 400. Bad Request: Subscription Id is null');
     //   Logger.saveLog();
     //   return 400;
     // }
+    if (SubscriptionId == null) {
+      System.debug('SubId is null');
+      Logger.error('Response: 400. Bad Request: Subscription Id is null');
+      Logger.saveLog();
+      return 400;
+    }
 
     Stripe_Subscription__c sub = new Stripe_Subscription__c();
 
