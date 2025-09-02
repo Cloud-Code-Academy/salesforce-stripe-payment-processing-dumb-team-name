@@ -71,9 +71,24 @@ Once installed and configured, the integration runs automatically:
    4. Stripe Support
 >[Stripe Support](https://support.stripe.com/)
 
+
 ## 🌭 Architecture
 
-Link to the Architecture Diagram
+### 🔹 Creating a Stripe Customer
+![Creating a Stripe Customer](images/Stripe%20Create%20Customer.drawio.png)
+
+
+### 🔹 Creating a Stripe Subscription
+![Creating a Stripe Subscription](images/Stripe%20Create%20Subscription.drawio.png)
+
+
+### 🔹 Updating a Stripe Customer
+![Updating a Stripe Customer](images/Stripe%20Update%20Customer.drawio.png)
+
+
+### 🔹 Updating a Stripe Subscription
+![Updating a Stripe Subscription](images/Stripe%20Update%20Subscription.drawio.png)
+
 
 
 ## 💞 Contributing
@@ -82,7 +97,7 @@ Link to the Architecture Diagram
 
    ## 📨 Questions And/Or Feedback
 
-   [Email Jason Towers](mailto:jasonmtowers@gmail.com) or send Jason a message on [LinkedIn](www.linkedin.com/in/jasonmtowers)
+   [Email Jason Towers](mailto:jasonmtowers@gmail.com) or send Jason a message on [LinkedIn](www.linkedin.com/in/jasonmtowers)<br>
    [Email Jonathan Lyles](jonathan.lyles.linkedin@gmail.com) or send Jonathan a message on [LinkedIn](https://www.linkedin.com/in/jonlyles/)
 
 
