@@ -1,3 +1,4 @@
+@IsTest
 public with sharing class StripeTestDataFactory {
   public static Stripe_Customer__c createStripeCustomer(Boolean doInsert) {
     Stripe_Customer__c customer = new Stripe_Customer__c(
