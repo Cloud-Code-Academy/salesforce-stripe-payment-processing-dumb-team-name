@@ -32,34 +32,6 @@ public without sharing class StripeCustomerWebhookStrategy implements IStripeWeb
   }
 
   /**
-   * @description Contains the logic for customer created events
-   *
-   * @return Integer Http response code
-   */
-  public Integer customerCreate(StripeWebhookCustomerWrapper wrapper) {
-    String customerId = wrapper.data.object_x.id;
-
-    Stripe_Customer__c customer = [
-      SELECT Default_Payment_Method__c, Stripe_Customer_ID__c
-      FROM Stripe_Customer__c
-      WHERE Stripe_Customer_ID__c = :customerId
-    ];
-
-    customer.Default_Payment_Method__c = wrapper.data.object_x.default_source;
-
-    try {
-      update customer;
-    } catch (DmlException e) {
-      Logger.error(e.getMessage());
-      return 422;
-    } catch (Exception e) {
-      Logger.error(e.getMessage());
-      return 500;
-    }
-    return 204;
-  }
-
-  /**
    * @description Contains the logic for customer updated events
    *
    * @return Integer Http response code

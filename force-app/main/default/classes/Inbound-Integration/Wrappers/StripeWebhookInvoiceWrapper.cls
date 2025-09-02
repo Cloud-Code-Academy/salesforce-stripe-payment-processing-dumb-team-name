@@ -37,7 +37,16 @@ public with sharing class StripeWebhookInvoiceWrapper {
     public String id { get; set; }
     public String object_x { get; set; }
     public MetadataWrapper metadata { get; set; }
-    // do I need other fields?
+    public ParentWrapper parent { get; set; }
+  }
+
+  public class ParentWrapper {
+    public SubscriptionItemDetails subscription_item_details { get; set; }
+  }
+
+  public class SubscriptionItemDetails {
+    public String subscription { get; set; }
+    public String subscription_item { get; set; }
   }
 
   public class MetadataWrapper {
