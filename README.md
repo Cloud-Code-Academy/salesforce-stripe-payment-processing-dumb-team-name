@@ -83,7 +83,6 @@ Once installed and configured, the integration runs automatically:
 - **Salesforce user** creates/updates a subscription record → Trigger → Handler → Service → Queueable → Stripe.  
 - **Stripe** notifies Salesforce of a change → Webhook → Queueable → Salesforce updates record.
 
-📌 Architecture Flow Placeholder: images/Inbound-Flow.png
 
 ## 🥴 Troubleshooting
 
