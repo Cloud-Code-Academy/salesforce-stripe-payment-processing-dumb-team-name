@@ -32,16 +32,19 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
    * @return Integer http response code
    */
   public Integer invoicePayment(StripeWebhookInvoiceWrapper wrapper) {
-    Integer result;
-
-    Stripe_Subscription__c sub = getSubscription(wrapper);
-    if (sub == null) {
-      Logger.error('Response code 400: Bad request. Missing Subscription');
+    if (
+      wrapper.data.object_x.lines.data[0].metadata.Salesforce_Subscription_Id ==
+      null
+    ) {
+      Logger.error('Bad request: Missing Salesforce Subscription Id');
+      Logger.saveLog();
       return 400;
     }
 
+    Integer result;
+
     Payment_Transaction__c payment = new Payment_Transaction__c();
-    // To decimal
+
     payment.Amount__c = wrapper.data.object_x.amount_paid / 100;
     payment.Currency__c = wrapper.data.object_x.currency_x;
     payment.Transaction_Date__c = DateUtils.timestampToDatetimeConverter(
@@ -51,9 +54,12 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
     payment.Stripe_Payment_Intent_ID__c = wrapper.data.object_x.id;
     payment.Status__c = wrapper.data.object_x.status;
 
-    payment.Stripe_Customer__c = sub.Stripe_Customer__c;
-    payment.Stripe_Subscription__c = sub.Id;
-    payment.Payment_Method_Type__c = sub.
+    Stripe_Customer__c stripeCustomer = getCustomerId(
+      wrapper.data.object_x.customer
+    );
+    payment.Stripe_Customer__c = stripeCustomer.Id;
+    payment.Stripe_Subscription__c = wrapper.data.object_x.lines.data[0]
+      .metadata.Salesforce_Subscription_Id;
 
     try {
       insert payment;
@@ -103,5 +109,15 @@ public without sharing class StripePaymentWebhookStrategy implements IStripeWebh
     String subId = wrapper.data.object_x.lines.data[0]
       .metadata.Salesforce_Subscription_Id;
     return subId;
+  }
+
+  public Stripe_Customer__c getCustomerId(String cusId) {
+    Stripe_Customer__c salesforceCustomer = [
+      SELECT Id
+      FROM Stripe_Customer__c
+      WHERE Stripe_Customer_ID__c = :cusId
+      LIMIT 1
+    ];
+    return salesforceCustomer;
   }
 }

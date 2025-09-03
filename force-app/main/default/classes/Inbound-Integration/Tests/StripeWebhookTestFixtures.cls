@@ -595,4 +595,46 @@ public with sharing class StripeWebhookTestFixtures {
 
     return jsonString;
   }
+
+  public static String paymentEvents(
+    Integer amount,
+    String customerId,
+    String subscriptionId,
+    String eventType
+  ) {
+    // Convert subscriptionId into valid JSON
+    String subscriptionJson = subscriptionId == null
+      ? 'null'
+      : '"' + subscriptionId + '"';
+
+    return '{' +
+      '  "id": "evt_test_123",' +
+      '  "created": 1756531800,' +
+      '  "object_x": "event",' +
+      '  "type": "' +
+      eventType +
+      '",' +
+      '  "data": {' +
+      '    "object_x": {' +
+      '      "object_x": "invoice",' +
+      '      "amount_due": 0,' +
+      '      "customer": "' +
+      customerId +
+      '",' +
+      '   "amount_paid": ' +
+      amount +
+      ',' +
+      '   "currency_x": "usd",' +
+      '      "lines": {' +
+      '        "data": [{' +
+      '          "metadata": {' +
+      '            "Salesforce_Subscription_Id": ' +
+      subscriptionJson +
+      '          }' +
+      '        }]' +
+      '      }' +
+      '    }' +
+      '  }' +
+      '}';
+  }
 }

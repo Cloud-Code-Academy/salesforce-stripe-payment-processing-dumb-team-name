@@ -10,13 +10,11 @@
 //@RestResource(urlMapping='/webhook/stripe/*')
 global without sharing class StripeEventsWebhook {
   public enum types {
-    customer_created,
     customer_updated,
     customer_subscription_created,
     customer_subscription_updated,
     customer_subscription_deleted,
-    invoice_paid,
-    invoice_payment_failed
+    invoice_paid
   }
 
   private static Map<StripeEventsWebhook.types, IStripeWebhookStrategy> eventTypeStrategyMap;
@@ -41,10 +39,6 @@ global without sharing class StripeEventsWebhook {
     );
     eventTypeStrategyMap.put(
       types.invoice_paid,
-      new StripePaymentWebhookStrategy()
-    );
-    eventTypeStrategyMap.put(
-      types.invoice_payment_failed,
       new StripePaymentWebhookStrategy()
     );
   }
