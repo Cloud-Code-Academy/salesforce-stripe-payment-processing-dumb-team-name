@@ -79,8 +79,6 @@ Once installed and configured, the integration runs automatically:
 3. A **Queueable Apex** job is enqueued to process the webhook event asynchronously.
 4. Salesforce records are updated to reflect the latest state from Stripe.
 
-📌 Architecture Flow Placeholder: images/Inbound-Flow.png
-
 ### Example Flow
 - **Salesforce user** creates/updates a subscription record → Trigger → Handler → Service → Queueable → Stripe.  
 - **Stripe** notifies Salesforce of a change → Webhook → Queueable → Salesforce updates record.
