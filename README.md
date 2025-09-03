@@ -1,11 +1,34 @@
 # Salesforce-Stripe Payment Processing Integration
 ## 🚀 Features
+Outbound Integration:
 
--Instant synchronization for Customer and Subscription data from Salesforce to Stripe
+- Instant synchronization for Customer and Subscription data from Salesforce to Stripe
+- Synchronization of Customer, Subscription, and Payment data from Stripe to Salesforce
 - Trigger-based updates whenever a record changes in Salesforce  
 - Queueable Apex implementation for reliable callouts  
 - Error handling and logging for failed sync attempts  
-- Extensible design to add more fields or functionality later 
+- Extensible design to add more fields or functionality later
+
+Inbound Integration: 
+
+- Synchronization of Customer, Subscription, and Payment data from Stripe to Salesforce
+- Webhooks at Stripe listen for customer, subscription, and payment events
+- SHA-256 hash verification ensures data integrity and authenticity
+- Strategies dynamically select the class to handle payloads based on event type
+- Queueable Apex for asynchronous callouts and processing  
+- Finalizer implementation with 5 automatic retries on failure  
+- Error handling and logging via Nebula Logger 
+- Nightly batch sync job to reconcile payment data
+
+Nightly Sync:
+
+- Automated nightly execution using Schedulable Apex
+- Batch Apex processing for bulk updates of customer payment data
+- Retrieves new and updated accounts from Salesforce for processing
+- Callouts to Stripe to fetch the latest customer and payment information
+- Updates Salesforce records with accurate Stripe data
+- Configurable via Named Credentials for secure API authentication
+- Easily scheduled and managed from Salesforce Setup 
 
 ## Setup Instructions
 
@@ -20,6 +43,10 @@
 
 >[Stripe Dashboard](https://dashboard.stripe.com/test/dashboard)
 
+- Stripe Webhook setup required to receive events (e.g. customer.updated, invoice.paid, etc.)
+
+- Webhook secret used for SHA-256 hash verification
+
 
 ### 2. 🛠️ Installation
    1. Clone or pull this repository into your local Salesforce DX / VS Code project  
@@ -28,8 +55,11 @@
       sfdx force:source:deploy -p force-app
 
 ### 3. 🤓 Configuration
-   ## Named Credential/ External Credential Permissions
+   1. Named Credential/ External Credential Permissions
    Configure with your Stripe API key / secret by replacing "INSERT BEARER + YOUR KEY HERE" with your own (do not commit this to source control).
+
+   2. Stripe Webhook Setting (custom metadata)
+   Add a new Stripe Webhook Setting with the webhook secret from Stripe
 
 ## 🐎 Usage
 
@@ -49,12 +79,13 @@ Once installed and configured, the integration runs automatically:
 3. A **Queueable Apex** job is enqueued to process the webhook event asynchronously.
 4. Salesforce records are updated to reflect the latest state from Stripe.
 
----
+📌 Architecture Flow Placeholder: images/Inbound-Flow.png
 
 ### Example Flow
 - **Salesforce user** creates/updates a subscription record → Trigger → Handler → Service → Queueable → Stripe.  
 - **Stripe** notifies Salesforce of a change → Webhook → Queueable → Salesforce updates record.
 
+📌 Architecture Flow Placeholder: images/Inbound-Flow.png
 
 ## 🥴 Troubleshooting
 
