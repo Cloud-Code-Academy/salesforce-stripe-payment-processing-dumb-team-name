@@ -120,7 +120,11 @@ Once installed and configured, the integration runs automatically:
 ### 🔹 Updating a Stripe Subscription
 ![Updating a Stripe Subscription](images/Stripe%20Update%20Subscription.drawio.png)
 
+### 🔹 Daily Sync of Stripe Customer Data
+<img width="839" height="757" alt="StripeCustomerSyncScheduled" src="https://github.com/user-attachments/assets/eafc6284-d4df-431b-8b34-778e58bd8baa" />
 
+### 🔹 Stripe Webhook Events Handling
+<img width="830" height="454" alt="Stripe Events Handling" src="https://github.com/user-attachments/assets/6c7bf030-314f-476d-b832-ccb774f1cf14" />
 
 ## 💞 Contributing
 
