@@ -29,10 +29,14 @@ global with sharing class StripeCustomerSyncBatch implements Database.Batchable<
       StripeCustomerSyncBatchResponseWrapper res = StripeCustomerSyncService.syncCustomer(
         customer
       );
-      if (res != null) {
-        customer.Default_Payment_Method__c = res.data.object_x.default_source;
+      try {
+        customer.Default_Payment_Method__c = res.invoice_settings.default_payment_method;
+        toUpdate.add(customer);
+      } catch (NullPointerException e) {
+        Logger.error(
+          'NullPointerException: There was no value for default source.'
+        );
       }
-      toUpdate.add(customer);
     }
     try {
       update toUpdate;
