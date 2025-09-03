@@ -1,114 +1,135 @@
 # Salesforce-Stripe Payment Processing Integration
-## Integration Developer Capstone Project
+## 🚀 Features
+Outbound Integration:
 
-Welcome to your capstone project! You'll be building a production-ready payment processing solution that integrates Salesforce with Stripe to manage customer subscriptions and payments.
+- Instant synchronization for Customer and Subscription data from Salesforce to Stripe
+- Synchronization of Customer, Subscription, and Payment data from Stripe to Salesforce
+- Trigger-based updates whenever a record changes in Salesforce  
+- Queueable Apex implementation for reliable callouts  
+- Error handling and logging for failed sync attempts  
+- Extensible design to add more fields or functionality later
 
-## Project Overview
+Inbound Integration: 
 
-Your organization needs a payment processing solution that connects Salesforce with Stripe to handle customer subscriptions and payments. The finance team, sales team, and customer service representatives need to manage the complete customer payment lifecycle within Salesforce while leveraging Stripe's secure payment infrastructure.
+- Synchronization of Customer, Subscription, and Payment data from Stripe to Salesforce
+- Webhooks at Stripe listen for customer, subscription, and payment events
+- SHA-256 hash verification ensures data integrity and authenticity
+- Strategies dynamically select the class to handle payloads based on event type
+- Queueable Apex for asynchronous callouts and processing  
+- Finalizer implementation with 5 automatic retries on failure  
+- Error handling and logging via Nebula Logger 
+- Nightly batch sync job to reconcile payment data
 
-**Project Goal**: Build an integration that allows the business to manage customers, subscriptions, and payments seamlessly between Salesforce and Stripe.
+Nightly Sync:
 
-## What You'll Build
+- Automated nightly execution using Schedulable Apex
+- Batch Apex processing for bulk updates of customer payment data
+- Retrieves new and updated accounts from Salesforce for processing
+- Callouts to Stripe to fetch the latest customer and payment information
+- Updates Salesforce records with accurate Stripe data
+- Configurable via Named Credentials for secure API authentication
+- Easily scheduled and managed from Salesforce Setup 
 
-### Business User Stories
+## Setup Instructions
 
-**Sales Representatives need to:**
-- Create customer records in Salesforce that automatically sync to Stripe
-- Set up new subscriptions for customers with different pricing plans
-- Generate secure payment links that customers can use to complete their subscription signup
-- Track subscription status and billing periods
+### 1. 🏋️‍♀️ Prerequisites
+- Salesforce org with API access enabled
 
-**Customer Service Representatives need to:**
-- See when customer data changes in Stripe and have it update in Salesforce automatically
-- Access complete customer payment information when helping with support requests
+- A valid Stripe API Key (test or live, depending on environment)
 
-**Finance Team Members need to:**
-- Monitor subscription renewals and cancellations
-- Track successful and failed payments
-- Receive notifications when subscriptions change status
-- Maintain records of all payment transactions
+>[Stripe API References](https://docs.stripe.com/api)
 
-**Customers need to:**
-- Receive secure payment links to complete subscription signup
-- Use preferred payment methods through a trusted payment interface
-- Have confidence that payment information is handled securely
+>[Stripe API Keys](https://docs.stripe.com/keys)
 
-### Core Business Processes
+>[Stripe Dashboard](https://dashboard.stripe.com/test/dashboard)
 
-**New Customer Onboarding**:
-1. Sales rep creates a Contact in Salesforce with customer details
-2. Customer information is automatically sent to Stripe to create a customer account
-3. Sales rep can set up a subscription for the customer
-4. Customer receives a secure payment link to complete signup
-5. Once payment is complete, subscription becomes active in both systems
+- Stripe Webhook setup required to receive events (e.g. customer.updated, invoice.paid, etc.)
 
-**Ongoing Customer Management**:
-1. Any customer changes in Stripe automatically update the Salesforce record
-2. Subscription status changes (renewals, cancellations, failures) are reflected in Salesforce
-3. Payment successes and failures are tracked and visible to the finance team
-4. Customer service has access to complete payment and subscription history
+- Webhook secret used for SHA-256 hash verification
 
-## Project Requirements
 
-### Duration & Team Structure
-- **Duration**: 4 weeks
-- **Team Size**: 3 members maximum
-- **Individual Orgs**: Each team member works in separate orgs with shared GitHub repository
-- **Collaboration**: Required through Slack, virtual meetings, and code reviews
+### 2. 🛠️ Installation
+   1. Clone or pull this repository into your local Salesforce DX / VS Code project  
+   2. Deploy metadata to your Salesforce org  
+      ```sh
+      sfdx force:source:deploy -p force-app
 
-### Success Criteria
-1. **Functional Integration**: Customers, subscriptions, and payments flow seamlessly between systems
-2. **Data Accuracy**: Information is consistent and up-to-date in both Salesforce and Stripe
-3. **Security**: Payment processing meets industry security standards
-4. **Reliability**: System handles errors gracefully and retries failed operations
-5. **Usability**: Business users can manage the entire customer payment lifecycle from Salesforce
+### 3. 🤓 Configuration
+   1. Named Credential/ External Credential Permissions
+   Configure with your Stripe API key / secret by replacing "INSERT BEARER + YOUR KEY HERE" with your own (do not commit this to source control).
 
-### Security Requirements
-- All payment data must be handled through Stripe's secure infrastructure
-- No credit card information should be stored or processed directly in Salesforce
-- API communications must be authenticated and secure
-- Webhook data must be verified to ensure it comes from Stripe
+   2. Stripe Webhook Setting (custom metadata)
+   Add a new Stripe Webhook Setting with the webhook secret from Stripe
 
-## Getting Started
+## 🐎 Usage
 
-### 1. Research Phase
-- Review the complete business requirements provided by your instructor
-- Investigate Stripe's API capabilities and Salesforce integration options
-- Understand the data flow between systems
+Once installed and configured, the integration runs automatically:
 
-### 2. Design Phase
-- Plan your data model to support the business processes
-- Design your integration architecture
-- Determine security and authentication approaches
+### Outbound (Salesforce → Stripe)
+1. Create or update a record in Salesforce (e.g., Customer or Subscription).
+2. The **Trigger** fires, passing the record into the **Handler**.
+3. The **Handler** determines if a Stripe sync is required.
+4. The **Service Class** prepares the request payload for Stripe.
+5. A **Queueable Apex** job is enqueued to make the asynchronous callout.
+6. Stripe processes the request and returns a response.
 
-### 3. Build Phase
-- Implement customer synchronization (Salesforce → Stripe)
-- Build subscription management with secure checkout
-- Create webhook processing for real-time updates
-- Add comprehensive error handling and logging
+### Inbound (Stripe → Salesforce)
+1. Stripe sends an event (e.g., `invoice.payment_failed`, `customer.updated`) to the configured Salesforce **Webhook endpoint**.
+2. The **Webhook Controller** receives and validates the request.
+3. A **Queueable Apex** job is enqueued to process the webhook event asynchronously.
+4. Salesforce records are updated to reflect the latest state from Stripe.
 
-### 4. Test & Deploy
-- Verify all business requirements are met
-- Test error scenarios and edge cases
-- Create user documentation
-- Prepare final demonstration
+### Example Flow
+- **Salesforce user** creates/updates a subscription record → Trigger → Handler → Service → Queueable → Stripe.  
+- **Stripe** notifies Salesforce of a change → Webhook → Queueable → Salesforce updates record.
 
-## Key Questions to Consider
 
-- How will you structure data in Salesforce to support the business processes?
-- What Stripe APIs will you need to accomplish these business goals?
-- How will you ensure data stays synchronized between the systems?
-- What happens when something goes wrong - how will you handle errors?
-- How will you secure the integration and protect customer data?
-- What will the user experience look like for different types of users?
+## 🥴 Troubleshooting
 
-## Additional Resources
+   1. Verify Object and Field Level Security
+>[Field Level Security](https://help.salesforce.com/s/articleView?id=platform.users_profiles_field_perms.htm&type=5)
+>[Object Permissions](https://developer.salesforce.com/docs/atlas.en-us.securityImplGuide.meta/securityImplGuide/users_profiles_object_perms.htm)
 
-Your instructor will provide detailed project requirements and weekly planning guidance through external documentation.
+   2. Confirm Sharing Settings allow access
+>[Sharing and Record Access Features](https://help.salesforce.com/s/articleView?id=platform.managing_the_sharing_model.htm&type=5)
 
-## Remember
+   3. Double-check Stripe API Key and External Credential configuration
+>[Defining Named & External Credentials](https://help.salesforce.com/s/articleView?id=platform.external_services_define_named_credential.htm&type=5)
 
-The goal is to solve business problems through technology. Focus on what the business needs to accomplish, then determine the best technical approach to deliver those outcomes. This project should demonstrate your ability to build production-ready integrations that real businesses could deploy and use.
+   4. Stripe Support
+>[Stripe Support](https://support.stripe.com/)
 
-Good luck with your capstone project!
+
+## 🌭 Architecture
+
+### 🔹 Creating a Stripe Customer
+![Creating a Stripe Customer](images/Stripe%20Create%20Customer.drawio.png)
+
+
+### 🔹 Creating a Stripe Subscription
+![Creating a Stripe Subscription](images/Stripe%20Create%20Subscription.drawio.png)
+
+
+### 🔹 Updating a Stripe Customer
+![Updating a Stripe Customer](images/Stripe%20Update%20Customer.drawio.png)
+
+
+### 🔹 Updating a Stripe Subscription
+![Updating a Stripe Subscription](images/Stripe%20Update%20Subscription.drawio.png)
+
+### 🔹 Daily Sync of Stripe Customer Data
+<img width="839" height="757" alt="StripeCustomerSyncScheduled" src="https://github.com/user-attachments/assets/eafc6284-d4df-431b-8b34-778e58bd8baa" />
+
+### 🔹 Stripe Webhook Events Handling
+<img width="830" height="454" alt="Stripe Events Handling" src="https://github.com/user-attachments/assets/6c7bf030-314f-476d-b832-ccb774f1cf14" />
+
+## 💞 Contributing
+
+   Fork the repository and submit pull requests for enhancements or bug fixes
+
+   ## 📨 Questions And/Or Feedback
+
+   [Email Jason Towers](mailto:jasonmtowers@gmail.com) or send Jason a message on [LinkedIn](www.linkedin.com/in/jasonmtowers)<br>
+   [Email Jonathan Lyles](jonathan.lyles.linkedin@gmail.com) or send Jonathan a message on [LinkedIn](https://www.linkedin.com/in/jonlyles/)
+
+
